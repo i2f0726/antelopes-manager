@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦌 Antelopes Scores</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --orange: #FF6B2B;
+  --dark: #0F1117;
+  --card: #1A1D27;
+  --border: #2A2D3A;
+  --text: #E8E9EF;
+  --muted: #6B6F80;
+  --green: #2ECC71;
+  --red: #E74C3C;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--dark); color: var(--text); font-family: 'Noto Sans JP', sans-serif; min-height: 100vh; }
+
+header {
+  background: linear-gradient(135deg, #0F1117 0%, #1a1030 100%);
+  border-bottom: 3px solid var(--orange);
+  padding: 18px 16px 14px;
+  text-align: center;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; letter-spacing: 4px; color: var(--orange); text-shadow: 0 0 20px rgba(255,107,43,0.4); }
+.logo span { color: var(--text); }
+.subtitle { font-size: 0.65rem; color: var(--muted); letter-spacing: 3px; margin-top: 2px; }
+
+.tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--card); position: sticky; top: 80px; z-index: 99; }
+.tab { flex: 1; padding: 12px 8px; text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; letter-spacing: 1px; }
+.tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+.section { display: none; padding: 16px; }
+.section.active { display: block; }
+
+.btn { background: var(--orange); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: opacity 0.2s; white-space: nowrap; }
+.btn:active { opacity: 0.75; }
+
+input[type=password], input[type=text], input[type=date], input[type=number] {
+  background: var(--dark); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 10px 12px; font-size: 0.85rem;
+  font-family: 'Noto Sans JP', sans-serif; width: 100%; outline: none; transition: border-color 0.2s;
+}
+input:focus { border-color: var(--orange); }
+input[type=number] { text-align: center; font-size: 1.1rem; font-weight: 700; }
+label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; }
+
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.form-card h3 { font-size: 0.8rem; color: var(--orange); letter-spacing: 2px; margin-bottom: 16px; text-transform: uppercase; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.row1 { margin-bottom: 10px; }
+
+.q-block { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.q-block-title { font-size: 0.7rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 10px; }
+.q-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.q-col { text-align: center; }
+.q-col label { color: var(--orange); font-weight: 700; font-size: 0.65rem; }
+
+.live-preview { background: rgba(255,68,68,0.06); border: 1px solid rgba(255,68,68,0.3); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.live-preview-title { font-size: 0.65rem; color: #ff4444; letter-spacing: 2px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.live-score-row { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.live-team { text-align: center; }
+.live-team-name { font-size: 0.65rem; color: var(--muted); margin-bottom: 4px; }
+.live-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; line-height: 1; color: var(--text); }
+.live-num.ahead { color: var(--orange); }
+.live-vs { font-family: 'Bebas Neue', sans-serif; color: var(--muted); font-size: 0.9rem; }
+
+.login-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 20px; text-align: center; margin-bottom: 16px; }
+.login-box h3 { font-size: 0.85rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 16px; }
+.pw-row { display: flex; gap: 8px; max-width: 280px; margin: 0 auto; }
+
+.admin-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.admin-badge { background: rgba(255,107,43,0.15); border: 1px solid var(--orange); color: var(--orange); font-size: 0.65rem; padding: 5px 10px; border-radius: 100px; letter-spacing: 1px; }
+.admin-btns { display: flex; gap: 8px; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 10px; text-align: center; }
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--orange); line-height: 1; }
+.stat-label { font-size: 0.65rem; color: var(--muted); margin-top: 4px; letter-spacing: 1px; }
+
+.match-list { display: flex; flex-direction: column; gap: 12px; }
+.match-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; animation: fadeIn 0.3s ease; }
+.match-card.is-live { border-color: rgba(255,68,68,0.5); box-shadow: 0 0 16px rgba(255,68,68,0.12); }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.card-header { background: linear-gradient(90deg, rgba(255,107,43,0.15), transparent); padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+.card-header.is-live { background: linear-gradient(90deg, rgba(255,68,68,0.15), transparent); }
+.card-title { font-size: 0.9rem; font-weight: 900; }
+.card-meta { font-size: 0.65rem; color: var(--muted); margin-top: 3px; }
+
+.result-badge { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 4px; }
+.badge-win  { background: rgba(46,204,113,0.2); color: var(--green); }
+.badge-lose { background: rgba(231,76,60,0.2);  color: var(--red); }
+.badge-draw { background: rgba(255,107,43,0.2); color: var(--orange); }
+.badge-live { background: rgba(255,68,68,0.2);  color: #ff4444; }
+
+.card-body { padding: 14px 16px; }
+.score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.score-team { flex: 1; text-align: center; }
+.score-team-name { font-size: 0.65rem; color: var(--muted); margin-bottom: 4px; }
+.score-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; line-height: 1; }
+.score-num.winner { color: var(--orange); }
+.score-vs { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--muted); letter-spacing: 2px; }
+
+.q-detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: var(--dark); border-radius: 8px; padding: 10px; }
+.q-detail-item { text-align: center; }
+.q-detail-label { font-size: 0.6rem; color: var(--orange); font-weight: 700; display: block; margin-bottom: 3px; }
+.q-detail-score { font-size: 0.75rem; font-weight: 700; }
+.q-detail-score span { color: var(--muted); font-weight: 400; }
+
+.card-footer { padding: 8px 16px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
+
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-text { font-size: 0.85rem; }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px); background: var(--orange); color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 0.8rem; font-weight: 700; transition: transform 0.3s; z-index: 9999; white-space: nowrap; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.dot { display: inline-block; width: 7px; height: 7px; background: #ff4444; border-radius: 50%; animation: blink 1s infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🦌 ANTELOPES <span>SCORES</span></div>
+  <div class="subtitle">UOZU ANTELOPES BASKETBALL</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" id="tab-view" onclick="switchTab('view')">📊 試合結果</div>
+  <div class="tab" id="tab-admin" onclick="switchTab('admin')">✏️ 管理者入力</div>
+</div>
+
+<div id="view" class="section active">
+  <div class="stats-row" id="statsRow"></div>
+  <div class="match-list" id="matchList"></div>
+</div>
+
+<div id="admin" class="section">
+  <div class="login-box" id="loginBox">
+    <h3>🔒 ADMIN LOGIN</h3>
+    <div class="pw-row">
+      <input type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn" onclick="doLogin()">入力</button>
+    </div>
+  </div>
+
+  <div id="adminPanel" style="display:none">
+    <div class="admin-header">
+      <div class="admin-badge">✅ 管理者モード</div>
+      <div class="admin-btns">
+        <button class="btn" style="background:#1D6F42;font-size:0.72rem;padding:7px 12px" onclick="doExcel()">📊 Excel出力</button>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 id="formTitle">📝 試合を登録する</h3>
+
+      <div class="row1"><label>大会名 / 試合名</label><input type="text" id="fName" placeholder="例：〇〇カップ、練習試合"></div>
+      <div class="row2">
+        <div><label>日付</label><input type="date" id="fDate"></div>
+        <div><label>場所</label><input type="text" id="fPlace" placeholder="例：魚津市体育館"></div>
+      </div>
+      <div class="row1"><label>対戦相手</label><input type="text" id="fOpp" placeholder="例：〇〇ミニバス" oninput="updatePreview()"></div>
+
+      <div class="q-block">
+        <div class="q-block-title">クォーター別得点</div>
+        <div style="margin-bottom:12px">
+          <label style="margin-bottom:8px;color:var(--orange)">🦌 アンテロープス</label>
+          <div class="q-grid">
+            <div class="q-col"><label>1Q</label><input type="number" id="h1" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>2Q</label><input type="number" id="h2" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>3Q</label><input type="number" id="h3" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>4Q</label><input type="number" id="h4" min="0" value="0" oninput="updatePreview()"></div>
+          </div>
+        </div>
+        <div>
+          <label style="margin-bottom:8px;color:var(--muted)">🆚 相手チーム</label>
+          <div class="q-grid">
+            <div class="q-col"><label>1Q</label><input type="number" id="a1" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>2Q</label><input type="number" id="a2" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>3Q</label><input type="number" id="a3" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>4Q</label><input type="number" id="a4" min="0" value="0" oninput="updatePreview()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="live-preview">
+        <div class="live-preview-title"><span class="dot"></span>入力中プレビュー</div>
+        <div class="live-score-row">
+          <div class="live-team">
+            <div class="live-team-name">ANTELOPES</div>
+            <div class="live-num" id="prevH">0</div>
+          </div>
+          <div class="live-vs">VS</div>
+          <div class="live-team">
+            <div class="live-team-name" id="prevOpp">相手</div>
+            <div class="live-num" id="prevA">0</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" style="background:#cc2222;width:100%;margin-bottom:10px;padding:12px" onclick="doLive()">🔴 LIVE保存（試合中）</button>
+      <button class="btn" style="background:var(--green);width:100%;padding:14px;font-size:0.95rem" onclick="doConfirm()">✅ 試合確定して登録</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var PW = '0726';
+var matches = [];
+var liveId = null;
+var editId = null;
+var isAdmin = false;
+
+function loadData() {
+  try { matches = JSON.parse(localStorage.getItem('atl_m') || '[]'); } catch(e) { matches = []; }
+  try { liveId = JSON.parse(localStorage.getItem('atl_lid') || 'null'); } catch(e) { liveId = null; }
+}
+
+function saveData() {
+  localStorage.setItem('atl_m', JSON.stringify(matches));
+  localStorage.setItem('atl_lid', JSON.stringify(liveId));
+}
+
+function switchTab(t) {
+  document.getElementById('view').classList.toggle('active', t === 'view');
+  document.getElementById('admin').classList.toggle('active', t === 'admin');
+  document.getElementById('tab-view').classList.toggle('active', t === 'view');
+  document.getElementById('tab-admin').classList.toggle('active', t === 'admin');
+  if (t === 'view') render();
+}
+
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2500);
+}
+
+function doLogin() {
+  var pw = document.getElementById('pwInput').value;
+  if (pw === PW) {
+    isAdmin = true;
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    if (liveId) {
+      var m = null;
+      for (var i = 0; i < matches.length; i++) { if (matches[i].id === liveId) { m = matches[i]; break; } }
+      if (m) fillForm(m);
+    }
+    updatePreview();
+    toast('✅ ログインしました');
+  } else {
+    document.getElementById('pwInput').value = '';
+    toast('❌ パスワードが違います');
+  }
+}
+
+function gv(id) { return document.getElementById(id).value.trim(); }
+function gn(id) { return parseInt(document.getElementById(id).value) || 0; }
+
+function fillForm(m) {
+  document.getElementById('fName').value = m.name || '';
+  document.getElementById('fDate').value = m.date || '';
+  document.getElementById('fPlace').value = m.place || '';
+  document.getElementById('fOpp').value = m.opp || '';
+  var hids = ['h1','h2','h3','h4'];
+  var aids = ['a1','a2','a3','a4'];
+  for (var i = 0; i < 4; i++) {
+    document.getElementById(hids[i]).value = m.hq[i] || 0;
+    document.getElementById(aids[i]).value = m.aq[i] || 0;
+  }
+  editId = m.id;
+}
+
+function clearForm() {
+  var ids = ['fName','fDate','fPlace','fOpp'];
+  for (var i = 0; i < ids.length; i++) document.getElementById(ids[i]).value = '';
+  var qids = ['h1','h2','h3','h4','a1','a2','a3','a4'];
+  for (var i = 0; i < qids.length; i++) document.getElementById(qids[i]).value = 0;
+  editId = null;
+  document.getElementById('formTitle').textContent = '📝 試合を登録する';
+  updatePreview();
+}
+
+function updatePreview() {
+  var h = gn('h1') + gn('h2') + gn('h3') + gn('h4');
+  var a = gn('a1') + gn('a2') + gn('a3') + gn('a4');
+  var opp = gv('fOpp') || '相手';
+  document.getElementById('prevH').textContent = h;
+  document.getElementById('prevA').textContent = a;
+  document.getElementById('prevOpp').textContent = opp;
+  document.getElementById('prevH').className = 'live-num' + (h > a ? ' ahead' : '');
+  document.getElementById('prevA').className = 'live-num' + (a > h ? ' ahead' : '');
+}
+
+function buildMatch(isLive) {
+  var name = gv('fName'), date = gv('fDate'), opp = gv('fOpp');
+  if (!name || !date || !opp) { toast('⚠️ 大会名・日付・対戦相手は必須です'); return null; }
+  var hq = [gn('h1'),gn('h2'),gn('h3'),gn('h4')];
+  var aq = [gn('a1'),gn('a2'),gn('a3'),gn('a4')];
+  var ht = hq[0]+hq[1]+hq[2]+hq[3];
+  var at = aq[0]+aq[1]+aq[2]+aq[3];
+  return { id: editId || Date.now(), name: name, date: date, place: gv('fPlace'), opp: opp, hq: hq, aq: aq, ht: ht, at: at, live: isLive };
+}
+
+function doLive() {
+  var m = buildMatch(true);
+  if (!m) return;
+  var idx = -1;
+  for (var i = 0; i < matches.length; i++) { if (matches[i].id === m.id) { idx = i; break; } }
+  if (idx >= 0) matches[idx] = m; else matches.unshift(m);
+  liveId = m.id; editId = m.id;
+  saveData(); toast('🔴 LIVEで保存しました！'); render();
+}
+
+function doConfirm() {
+  var m = buildMatch(false);
+  if (!m) return;
+  var idx = -1;
+  for (var i = 0; i < matches.length; i++) { if (matches[i].id === m.id) { idx = i; break; } }
+  if (idx >= 0) matches[idx] = m; else matches.unshift(m);
+  liveId = null;
+  saveData(); clearForm(); toast('🏆 試合確定！登録しました！'); render();
+}
+
+function doEdit(id) {
+  var m = null;
+  for (var i = 0; i < matches.length; i++) { if (matches[i].id === id) { m = matches[i]; break; } }
+  if (!m) return;
+  fillForm(m);
+  document.getElementById('formTitle').textContent = '✏️ 試合を編集する';
+  switchTab('admin');
+  updatePreview();
+  window.scrollTo(0, 0);
+}
+
+function doDelete(id) {
+  if (!confirm('この試合を削除しますか？')) return;
+  var newM = [];
+  for (var i = 0; i < matches.length; i++) { if (matches[i].id !== id) newM.push(matches[i]); }
+  matches = newM;
+  if (liveId === id) liveId = null;
+  saveData(); render(); toast('🗑️ 削除しました');
+}
+
+function doExcel() {
+  var done = [];
+  for (var i = 0; i < matches.length; i++) { if (!matches[i].live) done.push(matches[i]); }
+  if (done.length === 0) { toast('⚠️ 確定済みの試合がありません'); return; }
+  var rows = [];
+  var wins = 0, loses = 0, draws = 0;
+  for (var i = 0; i < done.length; i++) {
+    var m = done[i];
+    var d = m.date ? new Date(m.date).toLocaleDateString('ja-JP') : '';
+    var r = m.ht > m.at ? '勝' : m.ht < m.at ? '負' : '引き分け';
+    if (m.ht > m.at) wins++; else if (m.ht < m.at) loses++; else draws++;
+    rows.push({
+      '日付': d, '大会名': m.name, '場所': m.place || '', '対戦相手': m.opp,
+      '1Q(我)': m.hq[0], '1Q(相)': m.aq[0], '2Q(我)': m.hq[1], '2Q(相)': m.aq[1],
+      '3Q(我)': m.hq[2], '3Q(相)': m.aq[2], '4Q(我)': m.hq[3], '4Q(相)': m.aq[3],
+      '合計(我)': m.ht, '合計(相)': m.at, '結果': r
+    });
+  }
+  rows.push({});
+  rows.push({ '日付': '【集計】', '大会名': done.length + '試合', '対戦相手': wins + '勝 ' + loses + '敗 ' + draws + '分' });
+  var ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:20},{wch:16},{wch:18},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:9},{wch:9},{wch:8}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '試合結果');
+  XLSX.writeFile(wb, 'アンテロープス試合結果_' + new Date().getFullYear() + '.xlsx');
+  toast('📊 Excelを出力しました！');
+}
+
+function render() {
+  var list = document.getElementById('matchList');
+  var statsRow = document.getElementById('statsRow');
+  var done = [];
+  for (var i = 0; i < matches.length; i++) { if (!matches[i].live) done.push(matches[i]); }
+  var wins = 0, loses = 0;
+  for (var i = 0; i < done.length; i++) {
+    if (done[i].ht > done[i].at) wins++;
+    else if (done[i].ht < done[i].at) loses++;
+  }
+  statsRow.innerHTML =
+    '<div class="stat-card"><div class="stat-num">' + done.length + '</div><div class="stat-label">試合数</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--green)">' + wins + '</div><div class="stat-label">勝利</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--red)">' + loses + '</div><div class="stat-label">敗戦</div></div>';
+
+  if (matches.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🏀</div><div class="empty-text">試合結果がまだありません</div></div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < matches.length; i++) {
+    var m = matches[i];
+    var live = m.live;
+    var win  = m.ht > m.at;
+    var draw = m.ht === m.at;
+    var bClass = live ? 'badge-live' : win ? 'badge-win' : draw ? 'badge-draw' : 'badge-lose';
+    var bText  = live ? '<span class="dot"></span>LIVE' : win ? 'WIN' : draw ? 'DRAW' : 'LOSE';
+    var dateStr = '';
+    if (m.date) {
+      var dd = new Date(m.date);
+      dateStr = (dd.getMonth()+1) + '月' + dd.getDate() + '日';
+    }
+    var qs = '';
+    for (var q = 0; q < 4; q++) {
+      qs += '<div class="q-detail-item"><span class="q-detail-label">' + (q+1) + 'Q</span>' +
+            '<div class="q-detail-score">' + m.hq[q] + '<span> - </span>' + m.aq[q] + '</div></div>';
+    }
+    var footer = '';
+    if (isAdmin) {
+      footer = '<div class="card-footer">' +
+        '<button class="btn" style="background:transparent;border:1px solid var(--orange);color:var(--orange);font-size:0.7rem;padding:6px 12px" onclick="doEdit(' + m.id + ')">✏️ 編集</button>' +
+        '<button class="btn" style="background:var(--red);font-size:0.7rem;padding:6px 12px" onclick="doDelete(' + m.id + ')">🗑️ 削除</button>' +
+        '</div>';
+    }
+    html +=
+      '<div class="match-card' + (live ? ' is-live' : '') + '">' +
+        '<div class="card-header' + (live ? ' is-live' : '') + '">' +
+          '<div><div class="card-title">' + m.name + '</div>' +
+          '<div class="card-meta">📅 ' + dateStr + '　📍 ' + (m.place || '—') + '</div></div>' +
+          '<div class="result-badge ' + bClass + '">' + bText + '</div>' +
+        '</div>' +
+        '<div class="card-body">' +
+          '<div class="score-row">' +
+            '<div class="score-team"><div class="score-team-name">ANTELOPES</div>' +
+            '<div class="score-num' + (win ? ' winner' : '') + '">' + m.ht + '</div></div>' +
+            '<div class="score-vs">VS</div>' +
+            '<div class="score-team"><div class="score-team-name">' + m.opp + '</div>' +
+            '<div class="score-num' + (!win && !draw ? ' winner' : '') + '">' + m.at + '</div></div>' +
+          '</div>' +
+          '<div class="q-detail-grid">' + qs + '</div>' +
+        '</div>' +
+        footer +
+      '</div>';
+  }
+  list.innerHTML = html;
+}
+
+loadData();
+render();
+</script>
+</body>
+</html>
