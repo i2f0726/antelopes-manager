@@ -536,18 +536,20 @@ function doConfirm() {
   }
 }
 
-function doEdit(id) {
+function doEdit(btn) {
+  var id = btn.getAttribute('data-id');
   for (var i = 0; i < matches.length; i++) {
-    if (matches[i].id === id) { fillForm(matches[i]); break; }
+    if (String(matches[i].id) === id) { fillForm(matches[i]); break; }
   }
   document.getElementById('formTitle').textContent = '✏️ 試合を編集する';
   switchTab('admin'); updatePreview(); window.scrollTo(0,0);
 }
 
-function doDelete(id) {
+function doDelete(btn) {
+  var id = btn.getAttribute('data-id');
   if (!confirm('この試合を削除しますか？')) return;
-  db.collection('matches').doc(String(id)).delete().then(function() {
-    if (liveId === String(id)) { liveId = null; saveMeta(); }
+  db.collection('matches').doc(id).delete().then(function() {
+    if (liveId === id) { liveId = null; saveMeta(); }
     toast('🗑️ 削除しました');
   });
 }
@@ -615,12 +617,13 @@ function render() {
     }
     var footer = '';
     if (isAdmin) {
-      footer = '<div class="card-footer">'+
-        '<button class="btn" style="background:transparent;border:1px solid var(--gold);color:var(--gold);font-size:0.7rem;padding:6px 12px" onclick="doEdit('+m.id+')">✏️ 編集</button>'+
-        '<button class="btn" style="background:var(--red);color:#fff;font-size:0.7rem;padding:6px 12px" onclick="doDelete('+m.id+')">🗑️ 削除</button>'+
+      var mid = m.id;
+      footer = '<div class="card-footer">' +
+        '<button class="btn" style="background:transparent;border:1px solid var(--gold);color:var(--gold);font-size:0.7rem;padding:6px 12px" onclick="doEdit(this)" data-id="' + mid + '">✏️ 編集</button>' +
+        '<button class="btn" style="background:var(--red);color:#fff;font-size:0.7rem;padding:6px 12px" onclick="doDelete(this)" data-id="' + mid + '">🗑️ 削除</button>' +
         '</div>';
     }
-    html +=
+        html +=
       '<div class="match-card'+(live?' is-live':'')+'">' +
         '<div class="card-header'+(live?' is-live':'')+'">' +
           '<div><div class="card-title">'+m.name+'</div>'+
