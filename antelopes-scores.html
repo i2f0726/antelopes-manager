@@ -6,6 +6,8 @@
 <title>Antelopes Scores</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --forest: #0a0a0a;
@@ -380,13 +382,41 @@ var liveId = null;
 var editId = null;
 var isAdmin = false;
 
+// Firebase設定
+var firebaseConfig = {
+  apiKey: "AIzaSyDccBj-qkrhtDSzWMvBYNBHOM1S7PhL46g",
+  authDomain: "antelopes-manager.firebaseapp.com",
+  projectId: "antelopes-manager",
+  storageBucket: "antelopes-manager.firebasestorage.app",
+  messagingSenderId: "1067922126784",
+  appId: "1:1067922126784:web:f241e05fce519e2cf83a25"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+
+// Firestoreからデータ読み込み＆リアルタイム更新
 function loadData() {
-  try { matches = JSON.parse(localStorage.getItem('atl_m') || '[]'); } catch(e) { matches = []; }
-  try { liveId = JSON.parse(localStorage.getItem('atl_lid') || 'null'); } catch(e) { liveId = null; }
+  db.collection('matches').orderBy('createdAt', 'desc').onSnapshot(function(snapshot) {
+    matches = [];
+    snapshot.forEach(function(doc) {
+      var d = doc.data();
+      d.id = doc.id;
+      matches.push(d);
+    });
+    db.collection('meta').doc('state').get().then(function(doc) {
+      liveId = doc.exists ? (doc.data().liveId || null) : null;
+    });
+    render();
+  });
 }
+
+// Firestoreにデータ保存
 function saveData() {
-  localStorage.setItem('atl_m', JSON.stringify(matches));
-  localStorage.setItem('atl_lid', JSON.stringify(liveId));
+  // saveDataは個別関数で処理するため空にする
+}
+
+function saveMeta() {
+  db.collection('meta').doc('state').set({ liveId: liveId });
 }
 
 function switchTab(t) {
@@ -469,20 +499,41 @@ function buildMatch(isLive) {
 
 function doLive() {
   var m = buildMatch(true); if (!m) return;
-  var idx = -1;
-  for (var i = 0; i < matches.length; i++) { if (matches[i].id === m.id) { idx = i; break; } }
-  if (idx >= 0) matches[idx] = m; else matches.unshift(m);
-  liveId = m.id; editId = m.id;
-  saveData(); toast('🔴 LIVEで保存しました！'); render();
+  m.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+  if (editId) {
+    db.collection('matches').doc(String(editId)).set(m).then(function() {
+      liveId = String(editId);
+      saveMeta();
+      toast('🔴 LIVEで保存しました！');
+    });
+  } else {
+    db.collection('matches').add(m).then(function(ref) {
+      editId = ref.id;
+      liveId = ref.id;
+      saveMeta();
+      toast('🔴 LIVEで保存しました！');
+    });
+  }
 }
 
 function doConfirm() {
   var m = buildMatch(false); if (!m) return;
-  var idx = -1;
-  for (var i = 0; i < matches.length; i++) { if (matches[i].id === m.id) { idx = i; break; } }
-  if (idx >= 0) matches[idx] = m; else matches.unshift(m);
-  liveId = null;
-  saveData(); clearForm(); toast('🏆 試合確定！登録しました！'); render();
+  m.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+  if (editId) {
+    db.collection('matches').doc(String(editId)).set(m).then(function() {
+      liveId = null;
+      saveMeta();
+      clearForm();
+      toast('🏆 試合確定！登録しました！');
+    });
+  } else {
+    db.collection('matches').add(m).then(function() {
+      liveId = null;
+      saveMeta();
+      clearForm();
+      toast('🏆 試合確定！登録しました！');
+    });
+  }
 }
 
 function doEdit(id) {
@@ -495,11 +546,10 @@ function doEdit(id) {
 
 function doDelete(id) {
   if (!confirm('この試合を削除しますか？')) return;
-  var newM = [];
-  for (var i = 0; i < matches.length; i++) { if (matches[i].id !== id) newM.push(matches[i]); }
-  matches = newM;
-  if (liveId === id) liveId = null;
-  saveData(); render(); toast('🗑️ 削除しました');
+  db.collection('matches').doc(String(id)).delete().then(function() {
+    if (liveId === String(id)) { liveId = null; saveMeta(); }
+    toast('🗑️ 削除しました');
+  });
 }
 
 function doExcel() {
@@ -600,7 +650,6 @@ function render() {
 }
 
 loadData();
-render();
 </script>
 </body>
 </html>
