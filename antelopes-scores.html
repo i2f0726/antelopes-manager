@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 :root {
   --forest: #0a0a0a;
@@ -304,9 +305,16 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
 <div id="admin" class="section">
   <div class="login-box" id="loginBox">
     <h3>🔒 ADMIN LOGIN</h3>
-    <div class="pw-row">
-      <input type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="btn" onclick="doLogin()">入力</button>
+    <div style="max-width:280px;margin:0 auto;">
+      <div style="margin-bottom:10px;">
+        <label>メールアドレス</label>
+        <input type="email" id="emailInput" placeholder="admin@example.com" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label>パスワード</label>
+        <input type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn" style="width:100%;padding:12px;" onclick="doLogin()">ログイン</button>
     </div>
   </div>
 
@@ -315,6 +323,7 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
       <div class="admin-badge">✅ 管理者モード</div>
       <div class="admin-btns">
         <button class="btn" style="font-size:0.72rem;padding:7px 14px" onclick="doExcel()">📊 Excel出力</button>
+        <button class="btn" style="font-size:0.72rem;padding:7px 14px;background:transparent;border:1px solid var(--muted);color:var(--muted);" onclick="doLogout()">🚪 ログアウト</button>
       </div>
     </div>
 
@@ -330,23 +339,24 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
 
       <div class="q-block">
         <div class="q-block-title">クォーター別得点</div>
+        <div id="qError" style="display:none;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.5);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:0.75rem;color:#EF5350;letter-spacing:1px;"></div>
         <div style="margin-bottom:12px">
-          <label style="margin-bottom:8px;color:var(--gold)">🦌 アンテロープス</label>
+          <label style="margin-bottom:8px;color:var(--gold)">🦌 アンテロープス（累計スコア）</label>
           <div class="q-grid">
-            <div class="q-col"><label>1Q</label><input type="number" id="h1" min="0" value="0" oninput="updatePreview()"></div>
-            <div class="q-col"><label>2Q</label><input type="number" id="h2" min="0" value="0" oninput="updatePreview()"></div>
-            <div class="q-col"><label>3Q</label><input type="number" id="h3" min="0" value="0" oninput="updatePreview()"></div>
-            <div class="q-col"><label>4Q</label><input type="number" id="h4" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>1Q終了</label><input type="number" id="h1" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>2Q終了</label><input type="number" id="h2" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>3Q終了</label><input type="number" id="h3" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>4Q終了</label><input type="number" id="h4" min="0" value="0" oninput="updatePreview()"></div>
           </div>
         </div>
         <div class="divider"></div>
         <div style="margin-top:12px">
-          <label style="margin-bottom:8px;color:var(--muted)">🆚 相手チーム</label>
+          <label style="margin-bottom:8px;color:var(--muted)">🆚 相手チーム（累計スコア）</label>
           <div class="q-grid">
-            <div class="q-col"><label>1Q</label><input type="number" id="a1" min="0" value="0" oninput="updatePreview()"></div>
-            <div class="q-col"><label>2Q</label><input type="number" id="a2" min="0" value="0" oninput="updatePreview()"></div>
-            <div class="q-col"><label>3Q</label><input type="number" id="a3" min="0" value="0" oninput="updatePreview()"></div>
-            <div class="q-col"><label>4Q</label><input type="number" id="a4" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>1Q終了</label><input type="number" id="a1" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>2Q終了</label><input type="number" id="a2" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>3Q終了</label><input type="number" id="a3" min="0" value="0" oninput="updatePreview()"></div>
+            <div class="q-col"><label>4Q終了</label><input type="number" id="a4" min="0" value="0" oninput="updatePreview()"></div>
           </div>
         </div>
       </div>
@@ -376,7 +386,7 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
 <div class="toast" id="toast"></div>
 
 <script>
-var PW = '0726';
+window.addEventListener("load", function() {
 var matches = [];
 var liveId = null;
 var editId = null;
@@ -393,6 +403,31 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
+var auth = firebase.auth();
+
+// ログイン状態を監視
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    isAdmin = true;
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    var btn = document.querySelector('#loginBox .btn');
+    if (btn) { btn.textContent = 'ログイン'; btn.disabled = false; }
+    if (liveId) {
+      for (var i = 0; i < matches.length; i++) {
+        if (matches[i].id === liveId) { fillForm(matches[i]); break; }
+      }
+    }
+    updatePreview();
+    toast('✅ ログインしました');
+    render();
+  } else {
+    isAdmin = false;
+    document.getElementById('loginBox').style.display = 'block';
+    document.getElementById('adminPanel').style.display = 'none';
+    render();
+  }
+});
 
 // Firestoreからデータ読み込み＆リアルタイム更新
 function loadData() {
@@ -435,21 +470,37 @@ function toast(msg) {
 }
 
 function doLogin() {
-  if (document.getElementById('pwInput').value === PW) {
-    isAdmin = true;
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    if (liveId) {
-      for (var i = 0; i < matches.length; i++) {
-        if (matches[i].id === liveId) { fillForm(matches[i]); break; }
-      }
-    }
-    updatePreview();
-    toast('✅ ログインしました');
-  } else {
+  var email = document.getElementById('emailInput').value.trim();
+  var pw = document.getElementById('pwInput').value;
+  if (!email || !pw) { toast('⚠️ メールとパスワードを入力してください'); return; }
+  var btn = document.querySelector('#loginBox .btn');
+  btn.textContent = '...';
+  btn.disabled = true;
+  firebase.auth().signInWithEmailAndPassword(email, pw)
+    .then(function() {
+      // onAuthStateChanged が処理する
+    })
+    .catch(function(e) {
+      btn.textContent = 'ログイン';
+      btn.disabled = false;
+      document.getElementById('pwInput').value = '';
+      toast('❌ ログイン失敗: メールまたはパスワードが違います');
+    });
+}
+
+function doLogout() {
+  firebase.auth().signOut().then(function() {
+    isAdmin = false;
+    document.getElementById('loginBox').style.display = 'block';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('emailInput').value = '';
     document.getElementById('pwInput').value = '';
-    toast('❌ パスワードが違います');
-  }
+    var btn = document.querySelector('#loginBox .btn');
+    btn.textContent = 'ログイン';
+    btn.disabled = false;
+    render();
+    toast('👋 ログアウトしました');
+  });
 }
 
 function gv(id) { return document.getElementById(id).value.trim(); }
@@ -478,9 +529,34 @@ function clearForm() {
   updatePreview();
 }
 
+function validateQScores() {
+  var hq = [gn('h1'),gn('h2'),gn('h3'),gn('h4')];
+  var aq = [gn('a1'),gn('a2'),gn('a3'),gn('a4')];
+  var errors = [];
+  var labels = ['1Q','2Q','3Q','4Q'];
+  for (var i = 1; i < 4; i++) {
+    if (hq[i] > 0 && hq[i] < hq[i-1]) {
+      errors.push('アンテロープス: ' + labels[i] + '終了(' + hq[i] + '点) が ' + labels[i-1] + '終了(' + hq[i-1] + '点) より小さいです');
+    }
+    if (aq[i] > 0 && aq[i] < aq[i-1]) {
+      errors.push('相手チーム: ' + labels[i] + '終了(' + aq[i] + '点) が ' + labels[i-1] + '終了(' + aq[i-1] + '点) より小さいです');
+    }
+  }
+  var el = document.getElementById('qError');
+  if (errors.length > 0) {
+    el.style.display = 'block';
+    el.innerHTML = '⚠️ 入力エラー<br>' + errors.join('<br>');
+  } else {
+    el.style.display = 'none';
+    el.innerHTML = '';
+  }
+  return errors.length === 0;
+}
+
 function updatePreview() {
-  var h = gn('h1')+gn('h2')+gn('h3')+gn('h4');
-  var a = gn('a1')+gn('a2')+gn('a3')+gn('a4');
+  validateQScores();
+  var h = Math.max(gn('h1'),gn('h2'),gn('h3'),gn('h4'));
+  var a = Math.max(gn('a1'),gn('a2'),gn('a3'),gn('a4'));
   var opp = gv('fOpp') || '相手';
   document.getElementById('prevH').textContent = h;
   document.getElementById('prevA').textContent = a;
@@ -494,10 +570,11 @@ function buildMatch(isLive) {
   if (!name || !date || !opp) { toast('⚠️ 大会名・日付・対戦相手は必須です'); return null; }
   var hq = [gn('h1'),gn('h2'),gn('h3'),gn('h4')];
   var aq = [gn('a1'),gn('a2'),gn('a3'),gn('a4')];
-  return { id: editId || Date.now(), name:name, date:date, place:gv('fPlace'), opp:opp, hq:hq, aq:aq, ht:hq[0]+hq[1]+hq[2]+hq[3], at:aq[0]+aq[1]+aq[2]+aq[3], live:isLive };
+  return { id: editId || Date.now(), name:name, date:date, place:gv('fPlace'), opp:opp, hq:hq, aq:aq, ht:Math.max(hq[0],hq[1],hq[2],hq[3]), at:Math.max(aq[0],aq[1],aq[2],aq[3]), live:isLive };
 }
 
 function doLive() {
+  if (!validateQScores()) { return; }
   var m = buildMatch(true); if (!m) return;
   m.createdAt = firebase.firestore.FieldValue.serverTimestamp();
   if (editId) {
@@ -505,18 +582,19 @@ function doLive() {
       liveId = String(editId);
       saveMeta();
       toast('🔴 LIVEで保存しました！');
-    });
+    }).catch(function(e) { toast('❌ エラー: ' + e.message); });
   } else {
     db.collection('matches').add(m).then(function(ref) {
       editId = ref.id;
       liveId = ref.id;
       saveMeta();
       toast('🔴 LIVEで保存しました！');
-    });
+    }).catch(function(e) { toast('❌ エラー: ' + e.message); });
   }
 }
 
 function doConfirm() {
+  if (!validateQScores()) { return; }
   var m = buildMatch(false); if (!m) return;
   m.createdAt = firebase.firestore.FieldValue.serverTimestamp();
   if (editId) {
@@ -532,7 +610,7 @@ function doConfirm() {
       saveMeta();
       clearForm();
       toast('🏆 試合確定！登録しました！');
-    });
+    }).catch(function(e) { toast('❌ エラー: ' + e.message); });
   }
 }
 
@@ -565,8 +643,8 @@ function doExcel() {
     var r = m.ht > m.at ? '勝' : m.ht < m.at ? '負' : '引き分け';
     if (m.ht > m.at) wins++; else if (m.ht < m.at) loses++; else draws++;
     rows.push({ '日付':d, '大会名':m.name, '場所':m.place||'', '対戦相手':m.opp,
-      '1Q(我)':m.hq[0], '1Q(相)':m.aq[0], '2Q(我)':m.hq[1], '2Q(相)':m.aq[1],
-      '3Q(我)':m.hq[2], '3Q(相)':m.aq[2], '4Q(我)':m.hq[3], '4Q(相)':m.aq[3],
+      '1Q(我)':m.hq[0], '1Q(相)':m.aq[0], '2Q(我)':m.hq[1]-m.hq[0], '2Q(相)':m.aq[1]-m.aq[0],
+      '3Q(我)':m.hq[2]-m.hq[1], '3Q(相)':m.aq[2]-m.aq[1], '4Q(我)':m.hq[3]-m.hq[2], '4Q(相)':m.aq[3]-m.aq[2],
       '合計(我)':m.ht, '合計(相)':m.at, '結果':r });
   }
   rows.push({});
@@ -612,8 +690,11 @@ function render() {
     if (m.date) { var dd = new Date(m.date); dateStr = dd.getFullYear()+'年'+(dd.getMonth()+1)+'月'+dd.getDate()+'日'; }
     var qs = '';
     for (var q = 0; q < 4; q++) {
+      var hScore = q === 0 ? m.hq[0] : m.hq[q] - m.hq[q-1];
+      var aScore = q === 0 ? m.aq[0] : m.aq[q] - m.aq[q-1];
+      if (m.hq[q] === 0 && m.aq[q] === 0 && q > 0) { hScore = 0; aScore = 0; }
       qs += '<div class="q-detail-item"><span class="q-detail-label">'+(q+1)+'Q</span>'+
-            '<div class="q-detail-score">'+m.hq[q]+'<span> - </span>'+m.aq[q]+'</div></div>';
+            '<div class="q-detail-score">'+hScore+'<span> - </span>'+aScore+'</div></div>';
     }
     var footer = '';
     if (isAdmin) {
@@ -653,6 +734,19 @@ function render() {
 }
 
 loadData();
+
+// HTMLのonclickから呼べるようにグローバルに登録
+window.switchTab = switchTab;
+window.doLogin = doLogin;
+  window.doLogout = doLogout;
+window.doLive = doLive;
+window.doConfirm = doConfirm;
+window.doEdit = doEdit;
+window.doDelete = doDelete;
+window.doExcel = doExcel;
+window.updatePreview = updatePreview;
+  window.validateQScores = validateQScores;
+}); // window.onload
 </script>
 </body>
 </html>
