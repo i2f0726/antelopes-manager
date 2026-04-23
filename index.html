@@ -1,0 +1,1286 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light">
+<!-- PWA設定 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c9a84c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="アンテロープス">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<style>
+  /* ===== カラーテーマ（ここを変えれば色違い版が作れます） ===== */
+  :root {
+    --theme-main: #c9a84c;        /* メインカラー（ゴールド） */
+    --theme-light: #f5e08a;       /* メインの明るい版 */
+    --theme-dark: #3a2e00;        /* メインの暗い版（バッジ背景など） */
+    --theme-text-on: #111;        /* メインカラー上に乗せる文字色 */
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  .pw-screen { display:flex; align-items:center; justify-content:center; min-height:500px; border-radius:16px; background:#1a1a1a; }
+  .pw-box { border:1px solid var(--theme-main); border-radius:16px; padding:32px 28px; text-align:center; width:300px; background:#222222; }
+  .pw-title { color:var(--theme-main); font-size:18px; font-weight:700; margin-bottom:4px; }
+  .pw-sub { color:#aaa; font-size:12px; margin-bottom:20px; }
+  .pin-disp { font-size:28px; letter-spacing:16px; color:#fff; margin:12px 0; min-height:40px; }
+  .pin-err { color:#e24b4a; font-size:12px; min-height:18px; margin-bottom:8px; }
+  .np { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .np-btn { all:unset; display:block; padding:14px; font-size:20px; font-weight:700; border-radius:10px; background-color:var(--theme-main) !important; color:var(--theme-text-on) !important; cursor:pointer; text-align:center; font-family:sans-serif; -webkit-text-fill-color:var(--theme-text-on) !important; }
+  .np-btn:active { background-color:var(--theme-light) !important; }
+  .app { display:none; position:relative; }
+  .header { background:#111; padding:16px; }
+  .header-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .header-left { display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
+  .header-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .admin-btn-header { padding:8px 12px; border-radius:8px; border:1.5px solid var(--theme-main); background:#222; color:var(--theme-main); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.15s; }
+  .admin-btn-header:hover { background:var(--theme-main); color:var(--theme-text-on); }
+  .admin-btn-header:active { transform:scale(0.96); }
+  .admin-btn-header.logout { border-color:#e24b4a; color:#e24b4a; background:#2a1414; }
+  .admin-btn-header.logout:hover { background:#e24b4a; color:#fff; }
+  .team-logo { width:48px; height:48px; border-radius:8px; background:var(--theme-main); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:8px; color:var(--theme-text-on); text-align:center; line-height:1.3; flex-shrink:0; }
+  .team-name { color:var(--theme-main); font-size:18px; font-weight:900; letter-spacing:1px; }
+  .team-sub { color:#888; font-size:10px; letter-spacing:2px; }
+  .header-stripe { height:3px; background:linear-gradient(90deg,var(--theme-main),var(--theme-light),var(--theme-main)); }
+  .stats-row { display:flex; gap:8px; padding:12px; background:var(--color-background-tertiary); }
+  .stat-card { flex:1; background:var(--color-background-secondary); border-radius:10px; padding:10px; text-align:center; border:0.5px solid var(--color-border-tertiary); }
+  .stat-num { font-size:20px; font-weight:700; color:var(--theme-main); }
+  .stat-label { font-size:10px; color:var(--color-text-secondary); margin-top:2px; }
+
+  /* 選手統計パネル（選手管理タブ内） */
+  .player-stats { background:#111; margin:0; padding:14px 12px; border-bottom:2px solid var(--theme-main); }
+  .ps-main { display:flex; align-items:center; background:#1a1a1a; border-radius:12px; padding:14px 10px; margin-bottom:10px; border:1px solid #333; }
+  .ps-main-item { flex:1; text-align:center; }
+  .ps-main-divider { width:1px; height:38px; background:#333; }
+  .ps-main-label { font-size:10px; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-weight:700; }
+  .ps-main-value { font-size:26px; font-weight:900; color:var(--theme-main); line-height:1; }
+  .ps-unit { font-size:13px; color:#888; margin-left:3px; font-weight:700; }
+  .ps-grades { display:flex; gap:6px; }
+  .ps-grade-item { flex:1; background:#1a1a1a; border-radius:8px; padding:8px 4px; text-align:center; border:1px solid #2a2a2a; display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .ps-grade-num { font-size:18px; font-weight:900; color:#fff; line-height:1; }
+  .ps-grade-label { font-size:10px; color:var(--theme-main); font-weight:700; }
+  .admin-bar { display:flex; justify-content:flex-start; align-items:center; padding:6px 16px; background:var(--color-background-secondary); border-bottom:0.5px solid var(--color-border-tertiary); }
+  .admin-status { font-size:11px; color:var(--color-text-secondary); font-weight:700; letter-spacing:0.5px; }
+  .admin-btn { font-size:11px; padding:5px 14px; border-radius:20px; border:0.5px solid var(--color-border-secondary); background:transparent; cursor:pointer; color:var(--color-text-primary); font-family:inherit; }
+  .admin-btn.logout { background:#fff0f0; color:#c00; border-color:#fcc; }
+  .tabs { display:flex; background:#111; border-bottom:0.5px solid var(--color-border-tertiary); padding:6px 6px 0; gap:4px; }
+  .tab { flex:1; padding:12px 8px; text-align:center; font-size:13px; font-weight:700; cursor:pointer; color:#888; background:#1f1f1f; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none; transition:all 0.15s; }
+  .tab:hover { color:#ccc; background:#2a2a2a; }
+  .tab.active { color:var(--theme-text-on); background:var(--theme-main); border-color:var(--theme-light); box-shadow:0 -2px 8px rgba(0,0,0,0.3); }
+  .toolbar { display:flex; gap:8px; padding:10px 12px; background:var(--color-background-primary); border-bottom:0.5px solid var(--color-border-tertiary); min-height:48px; align-items:center; flex-wrap:wrap; }
+  .tb-gold { padding:7px 16px; border-radius:20px; border:none; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--theme-main); color:var(--theme-text-on); }
+  .tb-red { padding:7px 16px; border-radius:20px; border:none; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; background:#fff0f0; color:#c00; border:0.5px solid #fcc; }
+  .grade-bar { display:flex; gap:8px; padding:8px 12px; background:var(--color-background-primary); border-bottom:0.5px solid var(--color-border-tertiary); align-items:center; }
+  .grade-btns { display:flex; gap:6px; flex:1; overflow-x:auto; }
+  .grade-btn { padding:5px 14px; border-radius:20px; border:0.5px solid var(--color-border-secondary); background:transparent; color:var(--color-text-secondary); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .grade-btn.active { background:var(--theme-main); color:var(--theme-text-on); border-color:var(--theme-main); }
+
+  /* ボール番号検索カード */
+  .ball-search-card { margin:10px 12px; padding:10px 12px; background:#fff8e1; border:1.5px solid var(--theme-main); border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .ball-search-label { font-size:12px; font-weight:700; color:var(--theme-dark); margin-bottom:6px; letter-spacing:0.5px; }
+  .search-box { position:relative; display:flex; align-items:center; }
+  .search-box input { width:100%; padding:9px 36px 9px 14px; border:1px solid var(--theme-main); border-radius:8px; background:#fff; color:#111; font-size:15px; font-weight:700; font-family:inherit; box-sizing:border-box; }
+  .search-box input:focus { outline:none; border-color:var(--theme-dark); box-shadow:0 0 0 2px rgba(201,168,76,0.2); }
+  .search-clear { position:absolute; right:6px; top:50%; transform:translateY(-50%); width:26px; height:26px; border-radius:50%; border:none; background:#888; color:#fff; font-size:11px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
+  .search-clear:hover { background:#555; }
+
+  /* 並べ替えプルダウン（grade-bar右端） */
+  .sort-select { padding:6px 8px; border:0.5px solid var(--color-border-secondary); border-radius:8px; background:var(--color-background-secondary); color:var(--color-text-primary); font-size:11px; font-weight:700; font-family:inherit; cursor:pointer; flex-shrink:0; max-width:130px; }
+  .sort-select:focus { outline:none; border-color:var(--theme-main); }
+
+  /* 検索ヒット時のハイライト表示 */
+  .search-hit-banner { padding:8px 12px; background:#fff3cd; border-bottom:1px solid var(--theme-main); font-size:12px; color:#333; font-weight:700; }
+  .search-hit-banner.empty { background:#fee; border-bottom-color:#c00; color:#c00; }
+
+  /* 確認バナー */
+  .confirm-banner { margin:12px; border-radius:12px; background:#fff3cd; border:1px solid var(--theme-main); padding:14px 16px; }
+  .confirm-banner p { font-size:13px; font-weight:700; color:#333; margin-bottom:10px; }
+  .confirm-btns { display:flex; gap:8px; }
+  .confirm-btns button { flex:1; padding:10px; border-radius:10px; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .confirm-exec { background:#c00; color:#fff; }
+  .confirm-cancel { background:#eee; color:#333; }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:14px; padding:14px; background:var(--color-background-tertiary); }
+  .card { background:var(--color-background-primary); border-radius:14px; border:0.5px solid var(--color-border-tertiary); padding:10px; cursor:pointer; position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; }
+  .card:hover { border-color:var(--theme-main); }
+  .card-accent { position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#333,var(--theme-main)); }
+  .card-badges { display:flex; gap:5px; align-items:center; margin-bottom:8px; flex-wrap:wrap; justify-content:center; width:100%; }
+  .grade-badge { background:#333; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; }
+  .num-badge { background:#111; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; border:1px solid var(--theme-main); }
+  .pos-badge { background:var(--theme-main); color:var(--theme-text-on); font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; }
+  .bibs-badge { background:#2a2a2a; color:#fff; font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; border:0.5px solid var(--theme-main); }
+  .ball-badge { background:#fff; color:#333; font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; border:0.5px solid var(--color-border-tertiary); }
+  .card-photo { width:100%; aspect-ratio:3/4; border-radius:10px; background:var(--color-background-secondary); border:1px solid var(--color-border-tertiary); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:8px; font-size:11px; color:var(--color-text-secondary); }
+  .card-photo img { width:100%; height:100%; object-fit:cover; }
+  .player-name { font-size:13px; font-weight:700; color:var(--color-text-primary); text-align:center; }
+  .player-roman { font-size:10px; color:var(--color-text-secondary); text-align:center; margin-bottom:3px; }
+  .player-info { font-size:11px; color:var(--color-text-secondary); text-align:center; }
+
+  .cal-wrap { padding:14px; background:var(--color-background-tertiary); }
+  .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .cal-title { font-size:16px; font-weight:700; color:var(--color-text-primary); }
+  .cal-nav { background:var(--theme-main); color:var(--theme-text-on); border:none; border-radius:8px; padding:6px 14px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .cal-grid { background:var(--color-background-primary); border-radius:14px; border:0.5px solid var(--color-border-tertiary); overflow:hidden; }
+  .cal-dow { display:grid; grid-template-columns:repeat(7,1fr); }
+  .cal-dow-cell { text-align:center; padding:8px 4px; font-size:11px; font-weight:700; color:var(--color-text-secondary); }
+  .cal-dow-cell:first-child { color:#e24b4a; }
+  .cal-dow-cell:last-child { color:#4a8ee2; }
+  .cal-days { display:grid; grid-template-columns:repeat(7,1fr); border-top:0.5px solid var(--color-border-tertiary); }
+  .cal-day { min-height:52px; min-width:0; padding:4px; border-right:0.5px solid var(--color-border-tertiary); border-bottom:0.5px solid var(--color-border-tertiary); cursor:pointer; overflow:hidden; }
+  .cal-day:nth-child(7n) { border-right:none; }
+  .cal-day.empty { background:var(--color-background-secondary); cursor:default; }
+  .cal-day.today .cal-day-num { background:var(--theme-main); color:var(--theme-text-on); border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .cal-day:hover:not(.empty) { background:var(--color-background-secondary); }
+  .cal-day-num { font-size:12px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+  .cal-day:nth-child(7n+1) .cal-day-num { color:#e24b4a; }
+  .cal-day:nth-child(7n) .cal-day-num { color:#4a8ee2; }
+  .cal-day.holiday .cal-day-num { color:#e24b4a !important; }
+  .cal-day-holiday-name { font-size:8px; color:#e24b4a; font-weight:700; margin-bottom:2px; line-height:1.1; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; }
+  .cal-event { font-size:9px; font-weight:700; padding:1px 4px; border-radius:4px; margin-bottom:1px; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.2; }
+  .ev-practice { background:#22c55e; color:#fff; }
+  .ev-game { background:#3b82f6; color:#fff; }
+  .ev-tournament { background:#dc2626; color:#fff; }
+  .ev-other { background:#6b7280; color:#fff; }
+  .schedule-list { margin-top:14px; }
+  .schedule-item { background:var(--color-background-primary); border-radius:12px; border:0.5px solid var(--color-border-tertiary); padding:12px 14px; margin-bottom:8px; display:flex; gap:12px; align-items:flex-start; }
+  .schedule-date-box { text-align:center; min-width:40px; }
+  .schedule-month { font-size:10px; color:var(--color-text-secondary); }
+  .schedule-day { font-size:22px; font-weight:700; color:var(--theme-main); line-height:1; }
+  .schedule-weekday { font-size:10px; color:var(--color-text-secondary); }
+  .schedule-info { flex:1; }
+  .schedule-type { font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-block; margin-bottom:4px; }
+  .schedule-title { font-size:14px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; }
+  .schedule-detail { font-size:11px; color:var(--color-text-secondary); }
+  .schedule-edit-btn { background:transparent; border:0.5px solid var(--color-border-secondary); border-radius:8px; padding:4px 10px; font-size:11px; cursor:pointer; color:var(--color-text-secondary); font-family:inherit; }
+  .overlay { display:none; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; padding:20px; }
+  .overlay.open { display:flex; }
+  /* 管理者PWポップアップ（画面中央フロート表示） */
+  .admin-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:16px; }
+  .admin-overlay.open { display:flex; }
+  .admin-pw-box { background:#222; border:1px solid var(--theme-main); border-radius:16px; padding:28px; text-align:center; width:280px; max-width:100%; }
+  .admin-pw-title { color:var(--theme-main); font-size:15px; font-weight:700; margin-bottom:16px; }
+  .admin-pin-disp { font-size:24px; letter-spacing:14px; color:#fff; margin:8px 0 4px; min-height:36px; }
+  .admin-pin-err { color:#e24b4a; font-size:12px; min-height:18px; margin-bottom:6px; }
+  /* モーダルをインライン展開方式に変更 */
+  .modal-bg { display:none; }
+  .modal-bg.open { display:block; }
+  .modal { background:var(--color-background-primary); border-radius:14px; padding:20px; border:1px solid var(--theme-main); margin:12px; box-sizing:border-box; }
+  .modal h3 { font-size:16px; font-weight:700; margin-bottom:4px; color:var(--color-text-primary); }
+  .modal label { font-size:12px; color:var(--color-text-secondary); display:block; margin-bottom:4px; margin-top:10px; }
+  .modal input, .modal select, .modal textarea { width:100%; padding:9px 12px; border:0.5px solid var(--color-border-secondary); border-radius:8px; background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px; font-family:inherit; box-sizing:border-box; }
+  .modal textarea { resize:vertical; min-height:70px; }
+  .modal-btns { display:flex; gap:8px; margin-top:16px; }
+  .modal-btns button { flex:1; padding:11px 10px; border-radius:10px; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .btn-cancel { background:#444; color:#fff; border:1px solid #666; }
+  .btn-cancel:active { background:#555; }
+  .btn-submit { background:var(--theme-main); color:var(--theme-text-on); }
+  .btn-delete { background:#c00; color:#fff; border:1px solid #a00; }
+  .btn-delete:active { background:#a00; }
+
+  /* 選手詳細モーダル（画面中央フロート表示） */
+  .detail-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:16px; }
+  .detail-overlay.open { display:flex; }
+  /* モーダル本体：高さ上限を画面の90%にし、内部を flex 縦並びに */
+  .detail-overlay .modal { margin:auto; max-width:420px; width:100%; max-height:90vh; background:#ffffff; position:relative; z-index:10000; display:flex; flex-direction:column; overflow:hidden; padding:0; }
+  /* 詳細コンテンツ部分だけがスクロール、ボタン領域は常に下に残る */
+  .detail-overlay #detailContent { flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; min-height:0; }
+  .detail-overlay .modal-btns { flex:0 0 auto; padding:14px 16px; margin-top:0; background:#ffffff; border-top:1px solid #e5e5e5; }
+
+  /* ===== スマートフォン対応 ===== */
+  html, body { -webkit-text-size-adjust:100%; background:#f5f5f5; color:#111; }
+
+  /* パスワード画面：枠を画面全体にフィット */
+  .pw-screen { min-height:100vh; min-height:100dvh; padding:16px; border-radius:0; }
+
+  /* スマホ幅（〜480px）の調整 */
+  @media (max-width:480px) {
+    /* 統計カード：5枚を2行に折り返し */
+    .stats-row { flex-wrap:wrap; gap:6px; padding:10px; }
+    .stat-card { flex:1 1 calc(33.33% - 4px); min-width:0; padding:8px 4px; }
+    .stat-card:nth-child(1), .stat-card:nth-child(2) { flex:1 1 calc(50% - 3px); }
+    .stat-num { font-size:18px; }
+    .stat-label { font-size:9px; }
+
+    /* 選手カード：2列確実に入るサイズ */
+    .grid { grid-template-columns:repeat(2, 1fr); gap:10px; padding:10px; }
+    .card { padding:8px; }
+    .card-badges { gap:3px; }
+    .grade-badge, .num-badge, .pos-badge { font-size:9px; padding:2px 6px; }
+    .player-name { font-size:12px; }
+    .player-roman { font-size:9px; }
+    .player-info { font-size:10px; }
+
+    /* ヘッダー：チーム名を少し詰める */
+    .header { padding:12px; }
+    .team-name { font-size:16px; letter-spacing:0.5px; }
+    .team-sub { font-size:9px; letter-spacing:1px; }
+    .header-left { gap:8px; }
+    .admin-btn-header { padding:6px 8px; font-size:10px; border-radius:6px; }
+
+    /* タブ：パディング縮小・アイコン込みで見やすく */
+    .tabs { padding:5px 5px 0; gap:3px; }
+    .tab { padding:10px 4px; font-size:12px; border-radius:8px 8px 0 0; }
+
+    /* ツールバー：折り返し許容済みなのでgap調整のみ */
+    .toolbar { gap:6px; padding:8px 10px; }
+    .tb-gold, .tb-red { padding:6px 12px; font-size:11px; }
+
+    /* カレンダー：日付セル小さめ */
+    .cal-wrap { padding:10px; }
+    .cal-day { min-height:44px; padding:2px; }
+    .cal-day-num { font-size:11px; width:18px; height:18px; }
+    .cal-event { font-size:8px; padding:1px 3px; }
+    .cal-dow-cell { padding:6px 2px; font-size:10px; }
+    .cal-title { font-size:14px; }
+
+    /* モーダル：左右マージン縮小 */
+    .modal { padding:16px; margin:8px; }
+    .modal h3 { font-size:15px; }
+
+    /* 管理者PWボックス */
+    .admin-pw-box { width:100%; max-width:280px; padding:20px; }
+
+    /* 日程リスト */
+    .schedule-item { padding:10px 12px; gap:10px; }
+    .schedule-day { font-size:20px; }
+  }
+
+  /* 極小画面（〜360px、古いiPhone SE等） */
+  @media (max-width:360px) {
+    .stat-num { font-size:16px; }
+    .grid { gap:8px; padding:8px; }
+    .pin-disp { font-size:24px; letter-spacing:12px; }
+  }
+</style>
+
+<div class="pw-screen" id="pwScreen">
+  <div class="pw-box">
+    <div style="width:56px;height:56px;border-radius:8px;background:var(--theme-main);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:8px;color:var(--theme-text-on);text-align:center;line-height:1.3;margin:0 auto 12px;">KAMIICHI<br>ANTELOPES</div>
+    <div class="pw-title">ANTELOPES</div>
+    <div class="pw-sub">パスワードを入力してください</div>
+    <div class="pin-disp" id="pinDisp">- - - -</div>
+    <div class="pin-err" id="pinErr"></div>
+    <div class="np">
+      <button class="np-btn" onclick="inp('1',0)">1</button><button class="np-btn" onclick="inp('2',0)">2</button><button class="np-btn" onclick="inp('3',0)">3</button>
+      <button class="np-btn" onclick="inp('4',0)">4</button><button class="np-btn" onclick="inp('5',0)">5</button><button class="np-btn" onclick="inp('6',0)">6</button>
+      <button class="np-btn" onclick="inp('7',0)">7</button><button class="np-btn" onclick="inp('8',0)">8</button><button class="np-btn" onclick="inp('9',0)">9</button>
+      <button class="np-btn" onclick="clr(0)">C</button><button class="np-btn" onclick="inp('0',0)">0</button><button class="np-btn" onclick="bsp(0)">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="team-logo">KAMIICHI<br>ANTELOPES</div>
+        <div>
+          <div class="team-name">ANTELOPES</div>
+          <div class="team-sub">BASKETBALL CLUB · KAMIICHI</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="admin-btn-header" id="pwChangeBtn" onclick="openPwChange()" style="display:none;">🔑 PW変更</button>
+        <button class="admin-btn-header" id="adminBtn" onclick="toggleAdmin()">🔒 管理者ログイン</button>
+      </div>
+    </div>
+  </div>
+  <div class="header-stripe"></div>
+  <!-- インフォバナー（トップ表示） -->
+  <div id="topInfoBanner" style="display:none;"></div>
+  <div class="admin-bar">
+    <span class="admin-status" id="adminStatus">閲覧モード</span>
+  </div>
+
+  <!-- 管理者PWポップアップ（画面中央に表示） -->
+  <div id="adminOverlay" class="admin-overlay">
+    <div class="admin-pw-box">
+      <div class="admin-pw-title">🔒 管理者パスワード</div>
+      <div class="admin-pin-disp" id="adminPinDisp">- - - -</div>
+      <div class="admin-pin-err" id="adminPinErr"></div>
+      <div class="np" style="margin-top:12px;">
+        <button class="np-btn" onclick="inp('1',1)">1</button><button class="np-btn" onclick="inp('2',1)">2</button><button class="np-btn" onclick="inp('3',1)">3</button>
+        <button class="np-btn" onclick="inp('4',1)">4</button><button class="np-btn" onclick="inp('5',1)">5</button><button class="np-btn" onclick="inp('6',1)">6</button>
+        <button class="np-btn" onclick="inp('7',1)">7</button><button class="np-btn" onclick="inp('8',1)">8</button><button class="np-btn" onclick="inp('9',1)">9</button>
+        <button class="np-btn" onclick="clr(1)">C</button><button class="np-btn" onclick="inp('0',1)">0</button><button class="np-btn" onclick="bsp(1)">⌫</button>
+      </div>
+      <button onclick="closeAdminOverlay()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:1px solid #555;background:#333;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;">キャンセル</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tab-player" onclick="switchTab('player')">🏀 選手管理</div>
+    <div class="tab" id="tab-schedule" onclick="switchTab('schedule')">📅 日程</div>
+    <div class="tab" id="tab-info" onclick="switchTab('info')">📢 INFO</div>
+  </div>
+
+  <!-- 選手タブ -->
+  <div id="view-player">
+    <!-- 選手統計パネル -->
+    <div class="player-stats">
+      <div class="ps-main">
+        <div class="ps-main-item">
+          <div class="ps-main-label">👥 選手数</div>
+          <div class="ps-main-value"><span id="statTotal">0</span><span class="ps-unit">名</span></div>
+        </div>
+        <div class="ps-main-divider"></div>
+        <div class="ps-main-item">
+          <div class="ps-main-label">📏 平均身長</div>
+          <div class="ps-main-value"><span id="statAvgH">-</span><span class="ps-unit" id="statAvgHUnit"></span></div>
+        </div>
+      </div>
+      <div class="ps-grades">
+        <div class="ps-grade-item"><span class="ps-grade-num" id="stat6">0</span><span class="ps-grade-label">6年</span></div>
+        <div class="ps-grade-item"><span class="ps-grade-num" id="stat5">0</span><span class="ps-grade-label">5年</span></div>
+        <div class="ps-grade-item"><span class="ps-grade-num" id="stat4">0</span><span class="ps-grade-label">4年</span></div>
+        <div class="ps-grade-item"><span class="ps-grade-num" id="stat3">0</span><span class="ps-grade-label">3年</span></div>
+        <div class="ps-grade-item"><span class="ps-grade-num" id="stat2">0</span><span class="ps-grade-label">2年</span></div>
+        <div class="ps-grade-item"><span class="ps-grade-num" id="stat1">0</span><span class="ps-grade-label">1年</span></div>
+      </div>
+    </div>
+    <div class="toolbar" id="playerToolbar">
+      <button class="tb-gold" id="addBtn" onclick="openAdd()" style="display:none;">＋ 選手追加</button>
+      <button class="tb-red" id="promotionBtn" onclick="showPromotion()" style="display:none;">🎓 新年度一括進級</button>
+      <button class="tb-gold" id="playerExcelBtn" onclick="exportPlayerExcel()" style="display:none;font-size:11px;">📊 選手Excel出力</button>
+    </div>
+    <!-- 選手追加/編集フォーム -->
+    <div class="modal-bg" id="addModal">
+      <div class="modal">
+        <h3 id="addModalTitle">選手を追加</h3>
+        <label>名前（漢字）<span style="color:#c00;">*</span></label><input type="text" id="fName" placeholder="例：山田太郎">
+        <label>フリガナ（ローマ字）</label><input type="text" id="fRoman" placeholder="例：YAMADA TARO">
+        <label>学年<span style="color:#c00;">*</span></label>
+        <select id="fGrade">
+          <option value="6">6年生</option><option value="5">5年生</option><option value="4">4年生</option>
+          <option value="3">3年生</option><option value="2">2年生</option><option value="1">1年生</option>
+        </select>
+        <label>背番号</label><input type="number" id="fNumber" placeholder="例：7">
+        <label>身長 (cm)</label><input type="number" id="fHeight" placeholder="例：140">
+        <label>ビブス番号</label><input type="number" id="fBibsNumber" placeholder="例：11">
+        <label>ビブス所有<span style="color:#c00;">*</span></label>
+        <select id="fBibsOwn">
+          <option value="team">チーム貸出</option>
+          <option value="personal">個人購入</option>
+        </select>
+        <label>ボール<span style="color:#c00;">*</span></label>
+        <select id="fBallType" onchange="toggleBallNumber()">
+          <option value="team">チーム貸出</option>
+          <option value="personal">マイボール（個人所有）</option>
+        </select>
+        <div id="ballNumberBox"><label>チーム貸出ボール番号</label><input type="text" id="fBallNumber" placeholder="例：7 または A-3"></div>
+        <label>写真</label><input type="file" id="fPhoto" accept="image/*">
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeAdd()">✕ キャンセル</button>
+          <button class="btn-submit" id="addSubmitBtn" onclick="savePlayer()">追加する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 選手詳細モーダル（画面中央フロート表示） -->
+    <div class="detail-overlay" id="detailModal">
+      <div class="modal">
+        <div id="detailContent"></div>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeDetail()">✕ 閉じる</button>
+          <button class="btn-submit" id="detailEditBtn" onclick="editFromDetail()" style="display:none;">✏️ 編集</button>
+          <button class="btn-delete" id="detailDeleteBtn" onclick="deletePlayer()" style="display:none;">🗑️ 削除</button>
+        </div>
+      </div>
+    </div>
+    <!-- 確認バナー -->
+    <div class="confirm-banner" id="confirmBanner" style="display:none;">
+      <p id="confirmMsg"></p>
+      <div class="confirm-btns">
+        <button class="confirm-cancel" onclick="hidePromotion()">キャンセル</button>
+        <button class="confirm-exec" onclick="executePromotion()">進級する</button>
+      </div>
+    </div>
+    <!-- ボール番号検索カード -->
+    <div class="ball-search-card">
+      <div class="ball-search-label">🏀 チームボール番号検索</div>
+      <div class="search-box">
+        <input type="number" id="searchBall" placeholder="例：12" oninput="renderPlayers()" min="0">
+        <button class="search-clear" id="searchClearBtn" onclick="clearBallSearch()" style="display:none;" title="クリア">✕</button>
+      </div>
+    </div>
+    <div class="grade-bar">
+      <div class="grade-btns">
+        <button class="grade-btn active" onclick="filterGrade('all')" id="gb-all">全員</button>
+        <button class="grade-btn" onclick="filterGrade(6)" id="gb-6">6年生</button>
+        <button class="grade-btn" onclick="filterGrade(5)" id="gb-5">5年生</button>
+        <button class="grade-btn" onclick="filterGrade(4)" id="gb-4">4年生</button>
+        <button class="grade-btn" onclick="filterGrade(3)" id="gb-3">3年生</button>
+        <button class="grade-btn" onclick="filterGrade(2)" id="gb-2">2年生</button>
+        <button class="grade-btn" onclick="filterGrade(1)" id="gb-1">1年生</button>
+      </div>
+      <select id="sortBy" onchange="renderPlayers()" class="sort-select">
+        <option value="grade">学年順</option>
+        <option value="number">背番号順</option>
+        <option value="ball">ボール番号順</option>
+        <option value="bibs">ビブス番号順</option>
+      </select>
+    </div>
+    <div id="searchHitBanner" class="search-hit-banner" style="display:none;"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- 日程タブ -->
+  <div id="view-schedule" style="display:none;">
+    <!-- 日程入力フォーム（インライン） -->
+    <div class="modal-bg" id="scheduleModal">
+      <div class="modal">
+        <h3 id="scheduleModalTitle">予定を追加</h3>
+        <label>日付</label><input type="date" id="sDate">
+        <label>種別</label>
+        <select id="sType">
+          <option value="practice">練習</option><option value="game">練習試合</option>
+          <option value="tournament">大会</option><option value="other">その他</option>
+        </select>
+        <label>タイトル</label><input type="text" id="sTitle" placeholder="例：〇〇中学との練習試合">
+        <label>開始時間</label><input type="time" id="sStart">
+        <label>終了時間</label><input type="time" id="sEnd">
+        <label>場所</label><input type="text" id="sPlace" placeholder="例：上市町体育館">
+        <label>メモ</label><textarea id="sMemo" placeholder="集合時間・持ち物など"></textarea>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeScheduleModal()">キャンセル</button>
+          <button class="btn-delete" id="sDeleteBtn" onclick="deleteSchedule()" style="display:none;background:#fff0f0;color:#c00;">削除</button>
+          <button class="btn-submit" onclick="saveSchedule()">保存</button>
+        </div>
+      </div>
+    </div>
+    <!-- PW変更フォームはapp直下に移動済み -->
+    <!-- Excel出力フォーム（管理者のみ） -->
+    <div class="modal-bg" id="excelModal">
+      <div class="modal">
+        <h3>📊 日程をExcel出力</h3>
+        <label>開始日</label><input type="date" id="excelFrom">
+        <label>終了日</label><input type="date" id="excelTo">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;">※ 空欄の場合は全期間を出力します</div>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeExcelModal()">キャンセル</button>
+          <button class="btn-submit" onclick="exportExcel()">出力する</button>
+        </div>
+      </div>
+    </div>
+    <div class="cal-wrap">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+        <button class="tb-gold" id="excelBtn" onclick="openExcelModal()" style="display:none;font-size:11px;">📊 Excel出力</button>
+      </div>
+      <div class="cal-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">＜</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button class="cal-nav" onclick="changeMonth(1)">＞</button>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-dow">
+          <div class="cal-dow-cell">日</div><div class="cal-dow-cell">月</div><div class="cal-dow-cell">火</div>
+          <div class="cal-dow-cell">水</div><div class="cal-dow-cell">木</div><div class="cal-dow-cell">金</div><div class="cal-dow-cell">土</div>
+        </div>
+        <div class="cal-days" id="calDays"></div>
+      </div>
+      <div class="schedule-list" id="scheduleList"></div>
+    </div>
+  </div>
+
+  <!-- インフォタブ -->
+  <div id="view-info" style="display:none;">
+    <div class="toolbar">
+      <button class="tb-gold" id="addInfoBtn" onclick="openInfoModal(null)" style="display:none;">＋ インフォ投稿</button>
+    </div>
+    <!-- インフォ入力フォーム（インライン） -->
+    <div id="infoModal" class="modal-bg">
+      <div class="modal">
+        <h3 id="infoModalTitle">インフォを投稿</h3>
+        <label>投稿者</label>
+        <select id="iFrom">
+          <option value="監督">監督</option>
+          <option value="コーチ">コーチ</option>
+          <option value="保護者会">保護者会</option>
+        </select>
+        <label>タイトル</label>
+        <input type="text" id="iTitle" placeholder="例：明日の練習について">
+        <label>内容</label>
+        <textarea id="iBody" placeholder="連絡内容を入力してください" style="min-height:120px;"></textarea>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeInfoModal()">キャンセル</button>
+          <button class="btn-delete" id="iDeleteBtn" onclick="deleteInfo()" style="display:none;">削除</button>
+          <button class="btn-submit" onclick="saveInfo()">投稿する</button>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px;background:var(--color-background-tertiary);" id="infoList">
+      <div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:13px;">インフォメーションはありません</div>
+    </div>
+  </div>
+
+  <!-- PW変更フォーム（app直下・常時アクセス可能） -->
+  <div class="modal-bg" id="pwChangeModal">
+    <div class="modal">
+      <h3>パスワード変更</h3>
+      <label>閲覧パス（現在：<span id="curViewPw">****</span>）</label>
+      <input type="number" id="newViewPw" placeholder="4桁の数字" maxlength="4">
+      <label>管理者パス（現在：<span id="curAdminPw">****</span>）</label>
+      <input type="number" id="newAdminPw" placeholder="4桁の数字" maxlength="4">
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;">※ 空欄のものは変更しません</div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closePwChange()">キャンセル</button>
+        <button class="btn-submit" onclick="savePwChange()">変更する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>const PASSWORDS={ view:'1234', admin:'9999' };
+const WEEKDAYS=['日','月','火','水','木','金','土'];
+const TYPE_LABEL={practice:'練習',game:'練習試合',tournament:'大会',other:'その他'};
+const TYPE_CLASS={practice:'ev-practice',game:'ev-game',tournament:'ev-tournament',other:'ev-other'};
+let pin='', adminPin='', isAdmin=false, currentFilter='all';
+let editingScheduleId=null;
+let editingInfoId=null;
+const now=new Date();
+let calYear=now.getFullYear(), calMonth=now.getMonth();
+
+// ===== デモ用サンプルデータ（実運用時は空配列に戻す） =====
+// ボール：'team'(チーム貸出) / 'personal'(マイボール)
+// ビブス：'team'(チーム貸出) / 'personal'(個人購入)
+let players=[
+  {id:'p1', name:'山田 太郎', roman:'YAMADA TARO', grade:6, number:7, height:148, bibsNumber:11, bibsOwn:'personal', ballType:'personal', ballNumber:'', photo:''},
+  {id:'p2', name:'佐藤 健', roman:'SATO KEN', grade:6, number:11, height:152, bibsNumber:12, bibsOwn:'team', ballType:'team', ballNumber:'1', photo:''},
+  {id:'p3', name:'鈴木 大輔', roman:'SUZUKI DAISUKE', grade:5, number:15, height:144, bibsNumber:5, bibsOwn:'team', ballType:'team', ballNumber:'2', photo:''},
+  {id:'p4', name:'高橋 翔', roman:'TAKAHASHI SHO', grade:5, number:8, height:140, bibsNumber:8, bibsOwn:'personal', ballType:'team', ballNumber:'3', photo:''},
+  {id:'p5', name:'田中 隼人', roman:'TANAKA HAYATO', grade:4, number:12, height:135, bibsNumber:13, bibsOwn:'team', ballType:'personal', ballNumber:'', photo:''},
+  {id:'p6', name:'渡辺 蓮', roman:'WATANABE REN', grade:4, number:4, height:132, bibsNumber:4, bibsOwn:'team', ballType:'team', ballNumber:'4', photo:''},
+  {id:'p7', name:'伊藤 颯太', roman:'ITO SOTA', grade:3, number:6, height:128, bibsNumber:6, bibsOwn:'team', ballType:'team', ballNumber:'5', photo:''},
+  {id:'p8', name:'中村 陸', roman:'NAKAMURA RIKU', grade:2, number:9, height:122, bibsNumber:9, bibsOwn:'team', ballType:'team', ballNumber:'6', photo:''}
+];
+
+// 今月のサンプル予定
+const _y=calYear, _m=String(calMonth+1).padStart(2,'0');
+let schedules=[
+  {id:'s1', date:`${_y}-${_m}-08`, type:'practice', title:'通常練習', start:'18:30', end:'20:30', place:'上市中学校体育館', memo:'体育館シューズ・タオル持参'},
+  {id:'s2', date:`${_y}-${_m}-15`, type:'game', title:'立山中との練習試合', start:'09:00', end:'12:00', place:'立山中学校', memo:'集合8:30 / ユニフォーム持参'},
+  {id:'s3', date:`${_y}-${_m}-22`, type:'practice', title:'通常練習', start:'18:30', end:'20:30', place:'上市中学校体育館', memo:''},
+  {id:'s4', date:`${_y}-${_m}-29`, type:'tournament', title:'富山県中学生大会 予選', start:'08:00', end:'17:00', place:'富山市総合体育館', memo:'弁当・水分多めに持参'}
+];
+
+let infos=[
+  {id:'i1', from:'監督', title:'今週末の練習試合について', body:'15日（土）の立山中との練習試合は予定通り実施します。\n集合は8:30、現地（立山中学校）です。\nユニフォーム上下、練習着、タオル、水分を必ず持参してください。', createdAt:Date.now()-86400000*2},
+  {id:'i2', from:'コーチ', title:'シュート練習の動画を共有します', body:'先日の練習で撮影したフォーム動画を保護者会LINEにアップしました。\n各自確認して、次回練習までにイメージを掴んでおいてください。', createdAt:Date.now()-86400000*5},
+  {id:'i3', from:'保護者会', title:'夏季合宿の費用について', body:'夏季合宿（8/3-5）の費用は一人15,000円となります。\n7月末までに保護者会会計までお振込みください。', createdAt:Date.now()-86400000*7}
+];
+
+function inp(n,mode){
+  if(mode===0){ if(pin.length>=4)return; pin+=n; updatePin(); if(pin.length===4)checkPin(); }
+  else { if(adminPin.length>=4)return; adminPin+=n; updateAdminPin(); if(adminPin.length===4)checkAdminPin(); }
+}
+function clr(m){ if(m===0){pin='';updatePin();}else{adminPin='';updateAdminPin();} }
+function bsp(m){ if(m===0){pin=pin.slice(0,-1);updatePin();}else{adminPin=adminPin.slice(0,-1);updateAdminPin();} }
+function updatePin(){ document.getElementById('pinDisp').textContent=(pin+'----').slice(0,4).split('').join(' '); }
+function updateAdminPin(){ document.getElementById('adminPinDisp').textContent=(adminPin+'----').slice(0,4).split('').join(' '); }
+function checkPin(){
+  if(pin===PASSWORDS.view||pin===PASSWORDS.admin){
+    isAdmin=pin===PASSWORDS.admin;
+    document.getElementById('pwScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    updateAdminUI(); renderPlayers(); renderCalendar(); renderInfos();
+  } else {
+    document.getElementById('pinErr').textContent='パスワードが違います';
+    setTimeout(()=>{ pin=''; updatePin(); document.getElementById('pinErr').textContent=''; },1000);
+  }
+}
+function checkAdminPin(){
+  if(adminPin===PASSWORDS.admin){ isAdmin=true; closeAdminOverlay(); updateAdminUI(); renderInfos(); }
+  else {
+    document.getElementById('adminPinErr').textContent='パスワードが違います';
+    setTimeout(()=>{ adminPin=''; updateAdminPin(); document.getElementById('adminPinErr').textContent=''; },1000);
+  }
+}
+function toggleAdmin(){
+  if(isAdmin){ isAdmin=false; updateAdminUI(); hidePromotion(); return; }
+  adminPin=''; updateAdminPin();
+  document.getElementById('adminPinErr').textContent='';
+  const overlay=document.getElementById('adminOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  // 背景タップで閉じる
+  overlay.onclick=(e)=>{ if(e.target===overlay) closeAdminOverlay(); };
+}
+function closeAdminOverlay(){
+  document.getElementById('adminOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  adminPin='';
+  updateAdminPin();
+}
+function updateAdminUI(){
+  document.getElementById('adminStatus').textContent=isAdmin?'✅ 管理者モード':'閲覧モード';
+  const btn=document.getElementById('adminBtn');
+  btn.textContent=isAdmin?'🚪 ログアウト':'🔒 管理者ログイン';
+  btn.className=isAdmin?'admin-btn-header logout':'admin-btn-header';
+  document.getElementById('addBtn').style.display=isAdmin?'block':'none';
+  document.getElementById('promotionBtn').style.display=isAdmin?'block':'none';
+  document.getElementById('pwChangeBtn').style.display=isAdmin?'block':'none';
+  document.getElementById('excelBtn').style.display=isAdmin?'block':'none';
+  document.getElementById('playerExcelBtn').style.display=isAdmin?'block':'none';
+  renderCalendar();
+}
+function switchTab(tab){
+  ['player','schedule','info'].forEach(t=>{
+    document.getElementById('view-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('tab-'+t).className=t===tab?'tab active':'tab';
+  });
+  if(tab==='schedule') renderCalendar();
+  if(tab==='info') renderInfos();
+}
+
+// 一括進級
+function showPromotion(){
+  const grade6=players.filter(p=>p.grade===6).length;
+  let msg=`全選手の学年を+1年します。`;
+  if(grade6>0) msg+=`\n小学6年生${grade6}名のデータと写真は削除されます。`;
+  document.getElementById('confirmMsg').textContent=msg;
+  document.getElementById('confirmBanner').style.display='block';
+}
+function hidePromotion(){
+  document.getElementById('confirmBanner').style.display='none';
+}
+function executePromotion(){
+  // 6年生を削除（卒業）
+  players=players.filter(p=>p.grade!==6);
+  // 残りを+1学年
+  players=players.map(p=>({...p, grade:p.grade+1}));
+  hidePromotion();
+  renderPlayers();
+}
+
+function filterGrade(g){
+  currentFilter=g;
+  document.querySelectorAll('.grade-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(g==='all'?'gb-all':'gb-'+g).classList.add('active');
+  renderPlayers();
+}
+// 編集中の選手ID（nullなら新規追加）
+let editingPlayerId=null;
+function openAdd(){
+  editingPlayerId=null;
+  document.getElementById('addModalTitle').textContent='選手を追加';
+  document.getElementById('addSubmitBtn').textContent='追加する';
+  // フォーム初期化
+  document.getElementById('fName').value='';
+  document.getElementById('fRoman').value='';
+  document.getElementById('fGrade').value='1';
+  document.getElementById('fNumber').value='';
+  document.getElementById('fHeight').value='';
+  document.getElementById('fBibsNumber').value='';
+  document.getElementById('fBibsOwn').value='team';
+  document.getElementById('fBallType').value='team';
+  document.getElementById('fBallNumber').value='';
+  document.getElementById('fPhoto').value='';
+  toggleBallNumber();
+  document.getElementById('addModal').style.display='block';
+}
+function closeAdd(){
+  document.getElementById('addModal').style.display='none';
+  editingPlayerId=null;
+}
+// ボール種別に応じてチーム貸出番号入力欄の表示切替
+function toggleBallNumber(){
+  const t=document.getElementById('fBallType').value;
+  document.getElementById('ballNumberBox').style.display=(t==='team')?'block':'none';
+}
+
+// 選手詳細モーダル
+let currentDetailId=null;
+function gradeLabel(g){ return g+'年生'; }
+function bibsOwnLabel(v){ return v==='personal'?'個人購入':'チーム貸出'; }
+function ballTypeLabel(p){
+  if(p.ballType==='personal') return 'マイボール';
+  return 'チーム貸出'+(p.ballNumber?`（No.${p.ballNumber}）`:'');
+}
+function openDetail(id){
+  const p=players.find(x=>x.id===id); if(!p) return;
+  currentDetailId=id;
+  const photoHtml=p.photo
+    ? `<img src="${p.photo}" style="width:100%;max-height:280px;object-fit:cover;">`
+    : `<div style="height:200px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary);font-size:13px;">写真未登録</div>`;
+  document.getElementById('detailContent').innerHTML=`
+    <div style="background:#111;padding:16px;color:#fff;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="background:var(--theme-main);color:var(--theme-text-on);font-size:12px;font-weight:900;padding:3px 10px;border-radius:6px;">${gradeLabel(p.grade)}</span>
+        ${p.number?`<span style="background:#fff;color:#111;font-size:12px;font-weight:900;padding:3px 10px;border-radius:6px;">#${p.number}</span>`:''}
+      </div>
+      <div style="font-size:20px;font-weight:900;margin-bottom:2px;">${p.name}</div>
+      <div style="font-size:11px;color:#aaa;letter-spacing:1px;">${p.roman||''}</div>
+    </div>
+    ${photoHtml}
+    <div style="padding:16px;">
+      <table style="width:100%;font-size:13px;border-collapse:collapse;">
+        <tr><td style="padding:8px 0;color:var(--color-text-secondary);width:40%;border-bottom:0.5px solid var(--color-border-tertiary);">学年</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${gradeLabel(p.grade)}</td></tr>
+        <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">背番号</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.number?'#'+p.number:'-'}</td></tr>
+        <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">身長</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.height?p.height+' cm':'-'}</td></tr>
+        <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">ビブス番号</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.bibsNumber?'#'+p.bibsNumber:'-'}</td></tr>
+        <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">ビブス所有</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${bibsOwnLabel(p.bibsOwn)}</td></tr>
+        <tr><td style="padding:8px 0;color:var(--color-text-secondary);">ボール</td><td style="padding:8px 0;font-weight:700;">${ballTypeLabel(p)}</td></tr>
+      </table>
+    </div>
+  `;
+  // 編集・削除ボタンは管理者のみ表示
+  document.getElementById('detailEditBtn').style.display=isAdmin?'flex':'none';
+  document.getElementById('detailDeleteBtn').style.display=isAdmin?'flex':'none';
+  const overlay=document.getElementById('detailModal');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  // 背景タップで閉じる
+  overlay.onclick=(e)=>{ if(e.target===overlay) closeDetail(); };
+}
+function closeDetail(){
+  document.getElementById('detailModal').classList.remove('open');
+  document.body.style.overflow='';
+  currentDetailId=null;
+}
+function deletePlayer(){
+  if(!currentDetailId) return;
+  const p=players.find(x=>x.id===currentDetailId);
+  if(!p) return;
+  if(!confirm(`「${p.name}」を削除しますか？\nこの操作は取り消せません。`)) return;
+  players=players.filter(x=>x.id!==currentDetailId);
+  closeDetail();
+  renderPlayers();
+}
+// 追加・編集兼用の保存関数
+function savePlayer(){
+  const name=document.getElementById('fName').value.trim();
+  if(!name){ alert('名前を入力してください'); return; }
+  const roman=document.getElementById('fRoman').value.trim();
+  const grade=Number(document.getElementById('fGrade').value);
+  if(!grade){ alert('学年を選択してください'); return; }
+  const number=document.getElementById('fNumber').value;
+  const height=document.getElementById('fHeight').value;
+  const bibsNumber=document.getElementById('fBibsNumber').value;
+  const bibsOwn=document.getElementById('fBibsOwn').value;
+  const ballType=document.getElementById('fBallType').value;
+  const ballNumber=document.getElementById('fBallNumber').value.trim();
+  // バリデーション：チーム貸出なら番号必須（※任意にしたい場合は下2行をコメントアウト）
+  // if(ballType==='team' && !ballNumber){ alert('チーム貸出ボールの番号を入力してください'); return; }
+  const file=document.getElementById('fPhoto').files[0];
+  const done=(photo)=>{
+    const data={
+      name, roman, grade,
+      number: number||null,
+      height: height?Number(height):null,
+      bibsNumber: bibsNumber||null,
+      bibsOwn,
+      ballType,
+      ballNumber: (ballType==='team')?ballNumber:'',
+      photo
+    };
+    if(editingPlayerId){
+      // 編集：既存の写真を残す（新規未選択時）
+      players=players.map(p=>{
+        if(p.id!==editingPlayerId) return p;
+        if(!file && !photo) data.photo=p.photo||'';
+        return {id:p.id, ...data};
+      });
+    } else {
+      players.push({id:'p'+Date.now(), ...data});
+    }
+    closeAdd();
+    renderPlayers();
+  };
+  if(file){ const r=new FileReader(); r.onload=e=>done(e.target.result); r.readAsDataURL(file); }
+  else {
+    // 編集時かつファイル未選択 → 既存写真を残す（doneの中で処理）
+    done(editingPlayerId?null:'');
+  }
+}
+
+// 詳細モーダルから編集モーダルへ
+function editFromDetail(){
+  if(!currentDetailId) return;
+  const p=players.find(x=>x.id===currentDetailId); if(!p) return;
+  editingPlayerId=p.id;
+  // フォームに値を流し込む
+  document.getElementById('fName').value=p.name||'';
+  document.getElementById('fRoman').value=p.roman||'';
+  document.getElementById('fGrade').value=String(p.grade||1);
+  document.getElementById('fNumber').value=p.number||'';
+  document.getElementById('fHeight').value=p.height||'';
+  document.getElementById('fBibsNumber').value=p.bibsNumber||'';
+  document.getElementById('fBibsOwn').value=p.bibsOwn||'team';
+  document.getElementById('fBallType').value=p.ballType||'team';
+  document.getElementById('fBallNumber').value=p.ballNumber||'';
+  document.getElementById('fPhoto').value='';
+  toggleBallNumber();
+  document.getElementById('addModalTitle').textContent='選手を編集';
+  document.getElementById('addSubmitBtn').textContent='保存する';
+  // 詳細を閉じて編集モーダルを開く
+  closeDetail();
+  document.getElementById('addModal').style.display='block';
+}
+// ボール検索クリア
+function clearBallSearch(){
+  document.getElementById('searchBall').value='';
+  renderPlayers();
+}
+function renderPlayers(){
+  // 学年フィルタ
+  let list=currentFilter==='all'?players.slice():players.filter(p=>p.grade===currentFilter);
+
+  // ボール番号検索（チーム貸出ボールの番号で部分一致）
+  const searchInput=document.getElementById('searchBall');
+  const searchVal=searchInput?searchInput.value.trim():'';
+  document.getElementById('searchClearBtn').style.display=searchVal?'flex':'none';
+  if(searchVal){
+    list=list.filter(p=>{
+      // ballNumberは文字列なので部分一致でOK（"12"で検索 → "12" "112" などヒット）
+      return p.ballType==='team' && p.ballNumber && String(p.ballNumber).includes(searchVal);
+    });
+  }
+
+  // ソート
+  const sortBy=document.getElementById('sortBy')?document.getElementById('sortBy').value:'grade';
+  const sorters={
+    grade:  (a,b)=>(a.grade-b.grade)||((a.number||999)-(b.number||999)),
+    number: (a,b)=>((a.number||999)-(b.number||999))||(a.grade-b.grade),
+    // ボール番号順：マイボール組（番号なし）は末尾に。番号は数値として比較（"7"<"12" を正しく処理）
+    ball:   (a,b)=>{
+      const av=(a.ballType==='team' && a.ballNumber!=='') ? parseInt(a.ballNumber,10) : Infinity;
+      const bv=(b.ballType==='team' && b.ballNumber!=='') ? parseInt(b.ballNumber,10) : Infinity;
+      // parseIntで NaN になる場合（例：A-3）は文字列扱いで末尾近くに
+      const aSafe=isNaN(av)?9999:av;
+      const bSafe=isNaN(bv)?9999:bv;
+      return (aSafe-bSafe)||(a.grade-b.grade);
+    },
+    bibs:   (a,b)=>{
+      const av=a.bibsNumber?parseInt(a.bibsNumber,10):Infinity;
+      const bv=b.bibsNumber?parseInt(b.bibsNumber,10):Infinity;
+      const aSafe=isNaN(av)?9999:av;
+      const bSafe=isNaN(bv)?9999:bv;
+      return (aSafe-bSafe)||(a.grade-b.grade);
+    }
+  };
+  list.sort(sorters[sortBy]||sorters.grade);
+
+  // 検索結果バナー
+  const banner=document.getElementById('searchHitBanner');
+  if(searchVal){
+    if(list.length===0){
+      banner.className='search-hit-banner empty';
+      banner.textContent=`🔍 ボール番号「${searchVal}」の持ち主は見つかりません`;
+    } else if(list.length===1){
+      banner.className='search-hit-banner';
+      banner.textContent=`🔍 ボール番号「${searchVal}」の持ち主：${list[0].name}`;
+    } else {
+      banner.className='search-hit-banner';
+      banner.textContent=`🔍 ボール番号「${searchVal}」を含む選手 ${list.length}名`;
+    }
+    banner.style.display='block';
+  } else {
+    banner.style.display='none';
+  }
+
+  document.getElementById('grid').innerHTML=list.map(p=>{
+    const ballTxt=(p.ballType==='personal')?'マイボール':('貸出'+(p.ballNumber?`#${p.ballNumber}`:''));
+    const bibsTxt=(p.bibsOwn==='personal')?'ビブス:個人':'ビブス:貸出'+(p.bibsNumber?`#${p.bibsNumber}`:'');
+    return `
+    <div class="card" onclick="openDetail('${p.id}')">
+      <div class="card-accent"></div>
+      <div class="card-badges">
+        <span class="grade-badge">${gradeLabel(p.grade)}</span>
+        ${p.number?`<span class="num-badge">#${p.number}</span>`:''}
+      </div>
+      <div class="card-photo">${p.photo?`<img src="${p.photo}">`:'選手の写真'}</div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-roman">${p.roman||''}</div>
+      <div class="player-info">${p.height?p.height+'cm':'-'}</div>
+      <div class="card-badges" style="margin-top:6px;margin-bottom:0;">
+        <span class="bibs-badge">${bibsTxt}</span>
+        <span class="ball-badge">${ballTxt}</span>
+      </div>
+    </div>`;
+  }).join('');
+  const all=players;
+  document.getElementById('statTotal').textContent=all.length;
+  for(let g=1; g<=6; g++){
+    document.getElementById('stat'+g).textContent=all.filter(p=>p.grade===g).length;
+  }
+  const hs=all.filter(p=>p.height).map(p=>p.height);
+  if(hs.length){
+    document.getElementById('statAvgH').textContent=Math.round(hs.reduce((a,b)=>a+b,0)/hs.length);
+    document.getElementById('statAvgHUnit').textContent='cm';
+  } else {
+    document.getElementById('statAvgH').textContent='-';
+    document.getElementById('statAvgHUnit').textContent='';
+  }
+}
+function changeMonth(d){ calMonth+=d; if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+
+// ===== 日本の祝日判定 =====
+// 春分の日（計算式、1980〜2099年に有効）
+function vernalEquinox(y){
+  if(y>=1980 && y<=2099) return Math.floor(20.8431 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
+  return 20;
+}
+// 秋分の日
+function autumnalEquinox(y){
+  if(y>=1980 && y<=2099) return Math.floor(23.2488 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
+  return 23;
+}
+// ハッピーマンデー系：その月の第n月曜の日
+function nthMonday(y, m, n){
+  const first=new Date(y, m-1, 1);
+  const firstMon=(8 - first.getDay()) % 7 + 1; // 月曜になる最初の日
+  return firstMon + (n-1)*7;
+}
+// y年m月d日が祝日なら祝日名、違うなら null
+function getHolidayName(y, m, d){
+  // 固定祝日
+  if(m===1 && d===1) return '元日';
+  if(m===2 && d===11) return '建国記念の日';
+  if(m===2 && d===23) return '天皇誕生日';
+  if(m===4 && d===29) return '昭和の日';
+  if(m===5 && d===3) return '憲法記念日';
+  if(m===5 && d===4) return 'みどりの日';
+  if(m===5 && d===5) return 'こどもの日';
+  if(m===8 && d===11) return '山の日';
+  if(m===11 && d===3) return '文化の日';
+  if(m===11 && d===23) return '勤労感謝の日';
+  // ハッピーマンデー
+  if(m===1 && d===nthMonday(y,1,2)) return '成人の日';
+  if(m===7 && d===nthMonday(y,7,3)) return '海の日';
+  if(m===9 && d===nthMonday(y,9,3)) return '敬老の日';
+  if(m===10 && d===nthMonday(y,10,2)) return 'スポーツの日';
+  // 春分・秋分
+  if(m===3 && d===vernalEquinox(y)) return '春分の日';
+  if(m===9 && d===autumnalEquinox(y)) return '秋分の日';
+  // 振替休日（日曜が祝日の場合、その後の最初の平日が振替休日）
+  // d から過去方向に遡り、祝日ではない日を飛ばして日曜の祝日があれば振替休日
+  // ただし d 自身が元々祝日の場合は上でreturn済みなのでここには来ない
+  const curDate=new Date(y, m-1, d);
+  // 月曜以降の平日でのみ判定
+  if(curDate.getDay() >= 1){
+    // 遡って連続した祝日をスキップし、日曜にたどり着いたらそれが祝日かチェック
+    let check=new Date(curDate);
+    check.setDate(check.getDate()-1);
+    // check が祝日である間は遡る
+    while(check.getDay() !== 0){
+      const cy=check.getFullYear(), cm=check.getMonth()+1, cd=check.getDate();
+      if(!getHolidayNameBase(cy, cm, cd)) break;
+      check.setDate(check.getDate()-1);
+    }
+    // check が日曜になったら祝日か判定
+    if(check.getDay() === 0){
+      const cy=check.getFullYear(), cm=check.getMonth()+1, cd=check.getDate();
+      if(getHolidayNameBase(cy, cm, cd)) return '振替休日';
+    }
+  }
+  return null;
+}
+// 振替休日判定用（振替自身を再帰させないベース関数）
+function getHolidayNameBase(y, m, d){
+  if(m===1 && d===1) return '元日';
+  if(m===2 && d===11) return '建国記念の日';
+  if(m===2 && d===23) return '天皇誕生日';
+  if(m===4 && d===29) return '昭和の日';
+  if(m===5 && d===3) return '憲法記念日';
+  if(m===5 && d===4) return 'みどりの日';
+  if(m===5 && d===5) return 'こどもの日';
+  if(m===8 && d===11) return '山の日';
+  if(m===11 && d===3) return '文化の日';
+  if(m===11 && d===23) return '勤労感謝の日';
+  if(m===1 && d===nthMonday(y,1,2)) return '成人の日';
+  if(m===7 && d===nthMonday(y,7,3)) return '海の日';
+  if(m===9 && d===nthMonday(y,9,3)) return '敬老の日';
+  if(m===10 && d===nthMonday(y,10,2)) return 'スポーツの日';
+  if(m===3 && d===vernalEquinox(y)) return '春分の日';
+  if(m===9 && d===autumnalEquinox(y)) return '秋分の日';
+  return null;
+}
+
+function renderCalendar(){
+  const y=calYear,m=calMonth;
+  document.getElementById('calTitle').textContent=`${y}年${m+1}月`;
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  const todayStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  let html='';
+  for(let i=0;i<first;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayEvs=schedules.filter(s=>s.date===dateStr);
+    const isToday=dateStr===todayStr;
+    const holiday=getHolidayName(y, m+1, d);
+    const adminClick=isAdmin?`onclick="openScheduleModal('${dateStr}')"`:'';
+    const holidayClass=holiday?' holiday':'';
+    const holidayLabel=holiday?`<div class="cal-day-holiday-name" title="${holiday}">${holiday}</div>`:'';
+    html+=`<div class="cal-day${isToday?' today':''}${holidayClass}" ${adminClick}>
+      <div class="cal-day-num">${d}</div>
+      ${holidayLabel}
+      ${dayEvs.map(e=>{
+        const disp=e.title.length>6?e.title.slice(0,6)+'…':e.title;
+        return `<div class="cal-event ${TYPE_CLASS[e.type]}" title="${e.title}">${disp}</div>`;
+      }).join('')}
+    </div>`;
+  }
+  document.getElementById('calDays').innerHTML=html;
+  renderScheduleList();
+}
+function renderScheduleList(){
+  const y=calYear,m=calMonth;
+  const monthEvs=schedules.filter(s=>{ const [sy,sm]=s.date.split('-').map(Number); return sy===y&&sm===m+1; }).sort((a,b)=>a.date.localeCompare(b.date));
+  if(monthEvs.length===0){ document.getElementById('scheduleList').innerHTML=`<div style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">この月の予定はありません</div>`; return; }
+  document.getElementById('scheduleList').innerHTML=monthEvs.map(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    const editBtn=isAdmin?`<button class="schedule-edit-btn" onclick="editSchedule('${s.id}')">編集</button>`:'';
+    const timeStr=s.start?`${s.start}${s.end?'〜'+s.end:''} `:'';
+    return `<div class="schedule-item">
+      <div class="schedule-date-box">
+        <div class="schedule-month">${m+1}月</div>
+        <div class="schedule-day">${d.getDate()}</div>
+        <div class="schedule-weekday">${WEEKDAYS[d.getDay()]}</div>
+      </div>
+      <div class="schedule-info">
+        <span class="schedule-type ${TYPE_CLASS[s.type]}">${TYPE_LABEL[s.type]}</span>
+        <div class="schedule-title">${s.title}</div>
+        <div class="schedule-detail">${timeStr}${s.place||''}</div>
+        ${s.memo?`<div class="schedule-detail" style="margin-top:2px;">${s.memo}</div>`:''}
+      </div>
+      ${editBtn}
+    </div>`;
+  }).join('');
+}
+function openScheduleModal(dateStr){
+  if(!isAdmin) return;
+  editingScheduleId=null;
+  document.getElementById('scheduleModalTitle').textContent='予定を追加';
+  document.getElementById('sDate').value=dateStr||'';
+  document.getElementById('sType').value='practice';
+  document.getElementById('sTitle').value='';
+  document.getElementById('sStart').value='';
+  document.getElementById('sEnd').value='';
+  document.getElementById('sPlace').value='';
+  document.getElementById('sMemo').value='';
+  document.getElementById('sDeleteBtn').style.display='none';
+  document.getElementById('scheduleModal').style.display='block';
+}
+function editSchedule(id){
+  if(!isAdmin) return;
+  const s=schedules.find(x=>x.id===id); if(!s) return;
+  editingScheduleId=id;
+  document.getElementById('scheduleModalTitle').textContent='予定を編集';
+  document.getElementById('sDate').value=s.date;
+  document.getElementById('sType').value=s.type;
+  document.getElementById('sTitle').value=s.title;
+  document.getElementById('sStart').value=s.start||'';
+  document.getElementById('sEnd').value=s.end||'';
+  document.getElementById('sPlace').value=s.place||'';
+  document.getElementById('sMemo').value=s.memo||'';
+  const delBtn=document.getElementById('sDeleteBtn');
+  delBtn.style.display='block';
+  delBtn.style.flex='1';
+  document.getElementById('scheduleModal').style.display='block';
+}
+function closeScheduleModal(){ document.getElementById('scheduleModal').style.display='none'; }
+function deleteSchedule(){
+  if(!editingScheduleId){ alert('削除対象がありません'); return; }
+  schedules=schedules.filter(x=>x.id!==editingScheduleId);
+  editingScheduleId=null;
+  closeScheduleModal(); renderCalendar();
+}
+
+// ===== Excel出力 =====
+function openExcelModal(){
+  if(!isAdmin) return;
+  // デフォルトで今年の1月1日〜12月31日をセット
+  const y=new Date().getFullYear();
+  document.getElementById('excelFrom').value=`${y}-01-01`;
+  document.getElementById('excelTo').value=`${y}-12-31`;
+  document.getElementById('excelModal').style.display='block';
+}
+function closeExcelModal(){ document.getElementById('excelModal').style.display='none'; }
+function exportExcel(){
+  const from=document.getElementById('excelFrom').value;
+  const to=document.getElementById('excelTo').value;
+  let data=schedules.sort((a,b)=>a.date.localeCompare(b.date));
+  if(from) data=data.filter(s=>s.date>=from);
+  if(to)   data=data.filter(s=>s.date<=to);
+  if(!data.length){ alert('該当する日程がありません'); return; }
+  const rows=data.map(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    const weekday=['日','月','火','水','木','金','土'][d.getDay()];
+    return {
+      '日付':s.date,
+      '曜日':weekday,
+      '種別':TYPE_LABEL[s.type]||s.type,
+      'タイトル':s.title,
+      '開始時間':s.start||'',
+      '終了時間':s.end||'',
+      '場所':s.place||'',
+      'メモ':s.memo||''
+    };
+  });
+  // SheetJS でExcel生成
+  const ws=XLSX.utils.json_to_sheet(rows);
+  // 列幅設定
+  ws['!cols']=[{wch:12},{wch:6},{wch:10},{wch:30},{wch:10},{wch:10},{wch:20},{wch:30}];
+  const wb=XLSX.utils.book_new();
+  const label=(from&&to)?`${from}_${to}`:(from?`${from}以降`:(to?`${to}まで`:'全期間'));
+  XLSX.utils.book_append_sheet(wb,ws,'日程');
+  XLSX.writeFile(wb,`日程_${label}.xlsx`);
+  closeExcelModal();
+}
+
+// ===== 選手Excel出力 =====
+function exportPlayerExcel(){
+  if(!players.length){ alert('選手データがありません'); return; }
+  const rows=[...players]
+    .sort((a,b)=>a.grade-b.grade||((a.number||999)-(b.number||999)))
+    .map(p=>({
+      '学年': gradeLabel(p.grade),
+      '背番号': p.number||'',
+      '名前': p.name,
+      'フリガナ': p.roman||'',
+      '身長(cm)': p.height||'',
+      'ビブス番号': p.bibsNumber||'',
+      'ビブス所有': bibsOwnLabel(p.bibsOwn),
+      'ボール種別': (p.ballType==='personal')?'マイボール':'チーム貸出',
+      'チーム貸出ボール番号': (p.ballType==='team')?(p.ballNumber||''):''
+    }));
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:6},{wch:8},{wch:14},{wch:20},{wch:10},{wch:10},{wch:12},{wch:14},{wch:18}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'選手一覧');
+  XLSX.writeFile(wb,'選手一覧.xlsx');
+}
+function saveSchedule(){
+  const date=document.getElementById('sDate').value;
+  const title=document.getElementById('sTitle').value.trim();
+  if(!date||!title){ alert('日付とタイトルを入力してください'); return; }
+  const s={ id:editingScheduleId||Date.now().toString(), date, type:document.getElementById('sType').value, title, start:document.getElementById('sStart').value, end:document.getElementById('sEnd').value, place:document.getElementById('sPlace').value.trim(), memo:document.getElementById('sMemo').value.trim() };
+  if(editingScheduleId){ schedules=schedules.map(x=>x.id===editingScheduleId?s:x); }
+  else { schedules.push(s); }
+  closeScheduleModal(); renderCalendar();
+}
+// ===== インフォメーション =====
+// 投稿者の色は3バージョン（金/緑/赤）どれとも被らないよう独立した3色を採用
+const FROM_COLOR={監督:'#ea6a1f', コーチ:'#2563eb', 保護者会:'#8b3fc0'};
+
+function renderInfos(){
+  // インフォタブ一覧
+  const listEl=document.getElementById('infoList');
+  document.getElementById('addInfoBtn').style.display=isAdmin?'block':'none';
+  if(!infos.length){
+    listEl.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:13px;">インフォメーションはありません</div>';
+  } else {
+    const sorted=[...infos].sort((a,b)=>b.createdAt-a.createdAt);
+    listEl.innerHTML=sorted.map(info=>{
+      const d=new Date(info.createdAt);
+      const dateStr=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      const editBtn=isAdmin?`<button class="schedule-edit-btn" onclick="openInfoModal('${info.id}')" style="flex-shrink:0;">編集</button>`:'';
+      const color=FROM_COLOR[info.from]||'#888';
+      return `<div style="background:var(--color-background-primary);border-radius:14px;border:0.5px solid var(--color-border-tertiary);padding:14px;margin-bottom:10px;border-left:4px solid ${color};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+              <span style="background:${color};color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.5px;">${info.from}</span>
+              <span style="font-size:11px;color:var(--color-text-secondary);">${dateStr}</span>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">${info.title}</div>
+            <div style="font-size:13px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.6;">${info.body}</div>
+          </div>
+          ${editBtn}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  renderTopInfoBanner();
+}
+
+function renderTopInfoBanner(){
+  const banner=document.getElementById('topInfoBanner');
+  if(!infos.length){ banner.style.display='none'; return; }
+  const sorted=[...infos].sort((a,b)=>b.createdAt-a.createdAt);
+  // 最新3件まで表示
+  const items=sorted.slice(0,3);
+  banner.style.display='block';
+  banner.innerHTML=`
+    <div style="padding:10px 12px 4px;background:var(--color-background-tertiary);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:700;color:var(--color-text-secondary);letter-spacing:1px;">📢 INFORMATION</span>
+        <span onclick="switchTab('info')" style="font-size:11px;color:var(--theme-main);cursor:pointer;font-weight:700;">すべて見る →</span>
+      </div>
+      ${items.map(info=>{
+        const color=FROM_COLOR[info.from]||'#888';
+        const d=new Date(info.createdAt);
+        const dateStr=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const bodyPreview=info.body.replace(/\n/g,' ');
+        return `<div onclick="switchTab('info')" style="background:var(--color-background-primary);border-radius:10px;border-left:4px solid ${color};padding:10px 14px;margin-bottom:8px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            <span style="background:${color};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;">${info.from}</span>
+            <span style="font-size:11px;color:var(--color-text-secondary);">${dateStr}</span>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px;">${info.title}</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bodyPreview}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function openInfoModal(id){
+  editingInfoId=id;
+  if(id){
+    const info=infos.find(x=>x.id===id); if(!info) return;
+    document.getElementById('infoModalTitle').textContent='インフォを編集';
+    document.getElementById('iFrom').value=info.from;
+    document.getElementById('iTitle').value=info.title;
+    document.getElementById('iBody').value=info.body;
+    document.getElementById('iDeleteBtn').style.display='block';
+  } else {
+    document.getElementById('infoModalTitle').textContent='インフォを投稿';
+    document.getElementById('iFrom').value='監督';
+    document.getElementById('iTitle').value='';
+    document.getElementById('iBody').value='';
+    document.getElementById('iDeleteBtn').style.display='none';
+  }
+  document.getElementById('infoModal').style.display='block';
+}
+function closeInfoModal(){ document.getElementById('infoModal').style.display='none'; }
+function saveInfo(){
+  const title=document.getElementById('iTitle').value.trim();
+  const body=document.getElementById('iBody').value.trim();
+  if(!title||!body){ alert('タイトルと内容を入力してください'); return; }
+  const info={
+    id:editingInfoId||Date.now().toString(),
+    from:document.getElementById('iFrom').value,
+    title, body,
+    createdAt:editingInfoId?(infos.find(x=>x.id===editingInfoId)?.createdAt||Date.now()):Date.now()
+  };
+  if(editingInfoId){ infos=infos.map(x=>x.id===editingInfoId?info:x); }
+  else { infos.push(info); }
+  closeInfoModal(); renderInfos();
+}
+function deleteInfo(){
+  if(!editingInfoId) return;
+  infos=infos.filter(x=>x.id!==editingInfoId);
+  closeInfoModal(); renderInfos();
+}
+
+// ===== パスワード変更 =====
+function openPwChange(){
+  document.getElementById('curViewPw').textContent=PASSWORDS.view;
+  document.getElementById('curAdminPw').textContent=PASSWORDS.admin;
+  document.getElementById('newViewPw').value='';
+  document.getElementById('newAdminPw').value='';
+  document.getElementById('pwChangeModal').style.display='block';
+}
+function closePwChange(){ document.getElementById('pwChangeModal').style.display='none'; }
+function savePwChange(){
+  const v=document.getElementById('newViewPw').value.trim();
+  const a=document.getElementById('newAdminPw').value.trim();
+  if(v&&!/^\d{4}$/.test(v)){ alert('閲覧パスは4桁の数字で入力してください'); return; }
+  if(a&&!/^\d{4}$/.test(a)){ alert('管理者パスは4桁の数字で入力してください'); return; }
+  if(v) PASSWORDS.view=v;
+  if(a) PASSWORDS.admin=a;
+  closePwChange();
+  alert('パスワードを変更しました');
+}
+</script>
