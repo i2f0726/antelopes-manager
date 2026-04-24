@@ -532,8 +532,25 @@
 </div>
 
 
+<!-- Firebase SDK (Compat版) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>const PASSWORDS={ view:'1234', admin:'9999' };
+<script>
+// ========== Firebase 初期化 ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyCNLYpN_LRu_34cEonsUIWNPF9gNW0O-Ik",
+  authDomain: "antelopes-manager-23ca5.firebaseapp.com",
+  projectId: "antelopes-manager-23ca5",
+  storageBucket: "antelopes-manager-23ca5.firebasestorage.app",
+  messagingSenderId: "300933895551",
+  appId: "1:300933895551:web:cc4dbb2d3df2e6731db64a"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ========== 定数 ==========
+const PASSWORDS={ view:'1234', admin:'9999' };
 const WEEKDAYS=['日','月','火','水','木','金','土'];
 const TYPE_LABEL={practice:'練習',game:'練習試合',tournament:'大会',other:'その他'};
 const TYPE_CLASS={practice:'ev-practice',game:'ev-game',tournament:'ev-tournament',other:'ev-other'};
@@ -543,34 +560,39 @@ let editingInfoId=null;
 const now=new Date();
 let calYear=now.getFullYear(), calMonth=now.getMonth();
 
-// ===== デモ用サンプルデータ（実運用時は空配列に戻す） =====
-// ボール：'team'(チーム貸出) / 'personal'(マイボール)
-// ビブス：'team'(チーム貸出) / 'personal'(個人購入)
-let players=[
-  {id:'p1', name:'山田 太郎', roman:'YAMADA TARO', grade:6, number:7, height:148, bibsNumber:11, bibsOwn:'personal', ballType:'personal', ballNumber:'', photo:''},
-  {id:'p2', name:'佐藤 健', roman:'SATO KEN', grade:6, number:11, height:152, bibsNumber:12, bibsOwn:'team', ballType:'team', ballNumber:'1', photo:''},
-  {id:'p3', name:'鈴木 大輔', roman:'SUZUKI DAISUKE', grade:5, number:15, height:144, bibsNumber:5, bibsOwn:'team', ballType:'team', ballNumber:'2', photo:''},
-  {id:'p4', name:'高橋 翔', roman:'TAKAHASHI SHO', grade:5, number:8, height:140, bibsNumber:8, bibsOwn:'personal', ballType:'team', ballNumber:'3', photo:''},
-  {id:'p5', name:'田中 隼人', roman:'TANAKA HAYATO', grade:4, number:12, height:135, bibsNumber:13, bibsOwn:'team', ballType:'personal', ballNumber:'', photo:''},
-  {id:'p6', name:'渡辺 蓮', roman:'WATANABE REN', grade:4, number:4, height:132, bibsNumber:4, bibsOwn:'team', ballType:'team', ballNumber:'4', photo:''},
-  {id:'p7', name:'伊藤 颯太', roman:'ITO SOTA', grade:3, number:6, height:128, bibsNumber:6, bibsOwn:'team', ballType:'team', ballNumber:'5', photo:''},
-  {id:'p8', name:'中村 陸', roman:'NAKAMURA RIKU', grade:2, number:9, height:122, bibsNumber:9, bibsOwn:'team', ballType:'team', ballNumber:'6', photo:''}
-];
+// ========== データ（Firestoreから読み込む） ==========
+let players=[];
+let schedules=[];
+let infos=[];
 
-// 今月のサンプル予定
-const _y=calYear, _m=String(calMonth+1).padStart(2,'0');
-let schedules=[
-  {id:'s1', date:`${_y}-${_m}-08`, type:'practice', title:'通常練習', start:'18:30', end:'20:30', place:'上市中学校体育館', memo:'体育館シューズ・タオル持参'},
-  {id:'s2', date:`${_y}-${_m}-15`, type:'game', title:'立山中との練習試合', start:'09:00', end:'12:00', place:'立山中学校', memo:'集合8:30 / ユニフォーム持参'},
-  {id:'s3', date:`${_y}-${_m}-22`, type:'practice', title:'通常練習', start:'18:30', end:'20:30', place:'上市中学校体育館', memo:''},
-  {id:'s4', date:`${_y}-${_m}-29`, type:'tournament', title:'富山県中学生大会 予選', start:'08:00', end:'17:00', place:'富山市総合体育館', memo:'弁当・水分多めに持参'}
-];
+// Firestoreリアルタイム監視を開始
+function startFirestoreSync(){
+  db.collection('players').onSnapshot(snapshot=>{
+    players=snapshot.docs.map(d=>({id:d.id, ...d.data()}));
+    renderPlayers();
+  }, err=>console.error('players sync error:', err));
 
-let infos=[
-  {id:'i1', from:'監督', title:'今週末の練習試合について', body:'15日（土）の立山中との練習試合は予定通り実施します。\n集合は8:30、現地（立山中学校）です。\nユニフォーム上下、練習着、タオル、水分を必ず持参してください。', createdAt:Date.now()-86400000*2},
-  {id:'i2', from:'コーチ', title:'シュート練習の動画を共有します', body:'先日の練習で撮影したフォーム動画を保護者会LINEにアップしました。\n各自確認して、次回練習までにイメージを掴んでおいてください。', createdAt:Date.now()-86400000*5},
-  {id:'i3', from:'保護者会', title:'夏季合宿の費用について', body:'夏季合宿（8/3-5）の費用は一人15,000円となります。\n7月末までに保護者会会計までお振込みください。', createdAt:Date.now()-86400000*7}
-];
+  db.collection('schedules').onSnapshot(snapshot=>{
+    schedules=snapshot.docs.map(d=>({id:d.id, ...d.data()}));
+    renderCalendar();
+  }, err=>console.error('schedules sync error:', err));
+
+  db.collection('infos').onSnapshot(snapshot=>{
+    infos=snapshot.docs.map(d=>({id:d.id, ...d.data()}))
+      .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    renderInfos();
+    renderTopInfoBanner();
+  }, err=>console.error('infos sync error:', err));
+
+  // パスワード設定（単一ドキュメント）
+  db.collection('settings').doc('passwords').onSnapshot(doc=>{
+    if(doc.exists){
+      const d=doc.data();
+      if(d.view) PASSWORDS.view=d.view;
+      if(d.admin) PASSWORDS.admin=d.admin;
+    }
+  }, err=>console.error('passwords sync error:', err));
+}
 
 function inp(n,mode){
   if(mode===0){ if(pin.length>=4)return; pin+=n; updatePin(); if(pin.length===4)checkPin(); }
@@ -646,13 +668,23 @@ function showPromotion(){
 function hidePromotion(){
   document.getElementById('confirmBanner').style.display='none';
 }
-function executePromotion(){
-  // 6年生を削除（卒業）
-  players=players.filter(p=>p.grade!==6);
-  // 残りを+1学年
-  players=players.map(p=>({...p, grade:p.grade+1}));
-  hidePromotion();
-  renderPlayers();
+async function executePromotion(){
+  try{
+    const batch=db.batch();
+    // 6年生を削除
+    players.filter(p=>p.grade===6).forEach(p=>{
+      batch.delete(db.collection('players').doc(p.id));
+    });
+    // 残りを+1学年
+    players.filter(p=>p.grade!==6).forEach(p=>{
+      batch.update(db.collection('players').doc(p.id), {grade: p.grade+1});
+    });
+    await batch.commit();
+    hidePromotion();
+  } catch(e){
+    alert('一括進級に失敗しました: '+e.message);
+    console.error(e);
+  }
 }
 
 function filterGrade(g){
@@ -740,16 +772,20 @@ function closeDetail(){
   document.body.style.overflow='';
   currentDetailId=null;
 }
-function deletePlayer(){
+async function deletePlayer(){
   if(!currentDetailId) return;
   const p=players.find(x=>x.id===currentDetailId);
   if(!p) return;
   if(!confirm(`「${p.name}」を削除しますか？\nこの操作は取り消せません。`)) return;
-  players=players.filter(x=>x.id!==currentDetailId);
-  closeDetail();
-  renderPlayers();
+  try{
+    await db.collection('players').doc(currentDetailId).delete();
+    closeDetail();
+  } catch(e){
+    alert('削除に失敗しました: '+e.message);
+    console.error(e);
+  }
 }
-// 追加・編集兼用の保存関数
+// 追加・編集兼用の保存関数（Firestore）
 function savePlayer(){
   const name=document.getElementById('fName').value.trim();
   if(!name){ alert('名前を入力してください'); return; }
@@ -762,10 +798,9 @@ function savePlayer(){
   const bibsOwn=document.getElementById('fBibsOwn').value;
   const ballType=document.getElementById('fBallType').value;
   const ballNumber=document.getElementById('fBallNumber').value.trim();
-  // バリデーション：チーム貸出なら番号必須（※任意にしたい場合は下2行をコメントアウト）
-  // if(ballType==='team' && !ballNumber){ alert('チーム貸出ボールの番号を入力してください'); return; }
   const file=document.getElementById('fPhoto').files[0];
-  const done=(photo)=>{
+
+  const commit=async (photo)=>{
     const data={
       name, roman, grade,
       number: number||null,
@@ -774,25 +809,29 @@ function savePlayer(){
       bibsOwn,
       ballType,
       ballNumber: (ballType==='team')?ballNumber:'',
-      photo
+      photo: photo===null ? (players.find(p=>p.id===editingPlayerId)?.photo||'') : photo
     };
-    if(editingPlayerId){
-      // 編集：既存の写真を残す（新規未選択時）
-      players=players.map(p=>{
-        if(p.id!==editingPlayerId) return p;
-        if(!file && !photo) data.photo=p.photo||'';
-        return {id:p.id, ...data};
-      });
-    } else {
-      players.push({id:'p'+Date.now(), ...data});
+    try{
+      if(editingPlayerId){
+        // 編集：既存IDを上書き
+        await db.collection('players').doc(editingPlayerId).set(data);
+      } else {
+        // 新規追加：自動ID
+        await db.collection('players').add(data);
+      }
+      closeAdd();
+    } catch(e){
+      alert('保存に失敗しました: '+e.message);
+      console.error(e);
     }
-    closeAdd();
-    renderPlayers();
   };
-  if(file){ const r=new FileReader(); r.onload=e=>done(e.target.result); r.readAsDataURL(file); }
-  else {
-    // 編集時かつファイル未選択 → 既存写真を残す（doneの中で処理）
-    done(editingPlayerId?null:'');
+  if(file){
+    const r=new FileReader();
+    r.onload=e=>commit(e.target.result);
+    r.readAsDataURL(file);
+  } else {
+    // 編集時かつファイル未選択 → 既存写真を残す（nullを渡すと既存を維持）
+    commit(editingPlayerId ? null : '');
   }
 }
 
@@ -1083,11 +1122,16 @@ function editSchedule(id){
   document.getElementById('scheduleModal').style.display='block';
 }
 function closeScheduleModal(){ document.getElementById('scheduleModal').style.display='none'; }
-function deleteSchedule(){
+async function deleteSchedule(){
   if(!editingScheduleId){ alert('削除対象がありません'); return; }
-  schedules=schedules.filter(x=>x.id!==editingScheduleId);
-  editingScheduleId=null;
-  closeScheduleModal(); renderCalendar();
+  try{
+    await db.collection('schedules').doc(editingScheduleId).delete();
+    editingScheduleId=null;
+    closeScheduleModal();
+  } catch(e){
+    alert('削除に失敗しました: '+e.message);
+    console.error(e);
+  }
 }
 
 // ===== Excel出力 =====
@@ -1154,14 +1198,22 @@ function exportPlayerExcel(){
   XLSX.utils.book_append_sheet(wb,ws,'選手一覧');
   XLSX.writeFile(wb,'選手一覧.xlsx');
 }
-function saveSchedule(){
+async function saveSchedule(){
   const date=document.getElementById('sDate').value;
   const title=document.getElementById('sTitle').value.trim();
   if(!date||!title){ alert('日付とタイトルを入力してください'); return; }
-  const s={ id:editingScheduleId||Date.now().toString(), date, type:document.getElementById('sType').value, title, start:document.getElementById('sStart').value, end:document.getElementById('sEnd').value, place:document.getElementById('sPlace').value.trim(), memo:document.getElementById('sMemo').value.trim() };
-  if(editingScheduleId){ schedules=schedules.map(x=>x.id===editingScheduleId?s:x); }
-  else { schedules.push(s); }
-  closeScheduleModal(); renderCalendar();
+  const data={ date, type:document.getElementById('sType').value, title, start:document.getElementById('sStart').value, end:document.getElementById('sEnd').value, place:document.getElementById('sPlace').value.trim(), memo:document.getElementById('sMemo').value.trim() };
+  try{
+    if(editingScheduleId){
+      await db.collection('schedules').doc(editingScheduleId).set(data);
+    } else {
+      await db.collection('schedules').add(data);
+    }
+    closeScheduleModal();
+  } catch(e){
+    alert('保存に失敗しました: '+e.message);
+    console.error(e);
+  }
 }
 // ===== インフォメーション =====
 // 投稿者の色は3バージョン（金/緑/赤）どれとも被らないよう独立した3色を採用
@@ -1248,24 +1300,36 @@ function openInfoModal(id){
   document.getElementById('infoModal').style.display='block';
 }
 function closeInfoModal(){ document.getElementById('infoModal').style.display='none'; }
-function saveInfo(){
+async function saveInfo(){
   const title=document.getElementById('iTitle').value.trim();
   const body=document.getElementById('iBody').value.trim();
   if(!title||!body){ alert('タイトルと内容を入力してください'); return; }
-  const info={
-    id:editingInfoId||Date.now().toString(),
+  const data={
     from:document.getElementById('iFrom').value,
     title, body,
     createdAt:editingInfoId?(infos.find(x=>x.id===editingInfoId)?.createdAt||Date.now()):Date.now()
   };
-  if(editingInfoId){ infos=infos.map(x=>x.id===editingInfoId?info:x); }
-  else { infos.push(info); }
-  closeInfoModal(); renderInfos();
+  try{
+    if(editingInfoId){
+      await db.collection('infos').doc(editingInfoId).set(data);
+    } else {
+      await db.collection('infos').add(data);
+    }
+    closeInfoModal();
+  } catch(e){
+    alert('保存に失敗しました: '+e.message);
+    console.error(e);
+  }
 }
-function deleteInfo(){
+async function deleteInfo(){
   if(!editingInfoId) return;
-  infos=infos.filter(x=>x.id!==editingInfoId);
-  closeInfoModal(); renderInfos();
+  try{
+    await db.collection('infos').doc(editingInfoId).delete();
+    closeInfoModal();
+  } catch(e){
+    alert('削除に失敗しました: '+e.message);
+    console.error(e);
+  }
 }
 
 // ===== パスワード変更 =====
@@ -1284,14 +1348,26 @@ function closePwChange(){
   document.getElementById('pwChangeModal').classList.remove('open');
   document.body.style.overflow='';
 }
-function savePwChange(){
+async function savePwChange(){
   const v=document.getElementById('newViewPw').value.trim();
   const a=document.getElementById('newAdminPw').value.trim();
   if(v&&!/^\d{4}$/.test(v)){ alert('閲覧パスは4桁の数字で入力してください'); return; }
   if(a&&!/^\d{4}$/.test(a)){ alert('管理者パスは4桁の数字で入力してください'); return; }
-  if(v) PASSWORDS.view=v;
-  if(a) PASSWORDS.admin=a;
-  closePwChange();
-  alert('パスワードを変更しました');
+  const update={};
+  if(v) update.view=v;
+  if(a) update.admin=a;
+  if(Object.keys(update).length===0){ closePwChange(); return; }
+  try{
+    await db.collection('settings').doc('passwords').set(update, {merge:true});
+    closePwChange();
+    alert('パスワードを変更しました');
+  } catch(e){
+    alert('保存に失敗しました: '+e.message);
+    console.error(e);
+  }
 }
+
+// ========== 起動 ==========
+// Firestoreのリアルタイム同期を開始
+startFirestoreSync();
 </script>
