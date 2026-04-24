@@ -159,9 +159,10 @@
   .admin-pw-title { color:var(--theme-main); font-size:15px; font-weight:700; margin-bottom:16px; }
   .admin-pin-disp { font-size:24px; letter-spacing:14px; color:#fff; margin:8px 0 4px; min-height:36px; }
   .admin-pin-err { color:#e24b4a; font-size:12px; min-height:18px; margin-bottom:6px; }
-  /* モーダルをインライン展開方式に変更 */
-  .modal-bg { display:none; }
-  .modal-bg.open { display:block; }
+  /* モーダル：画面中央フロート表示（オーバーレイ方式） */
+  .modal-bg { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
+  .modal-bg.open { display:flex; }
+  .modal-bg > .modal { margin:auto; max-width:420px; width:100%; position:relative; z-index:10000; background:#ffffff; box-shadow:0 8px 32px rgba(0,0,0,0.3); max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   /* 汎用ポップアップ（画面中央フロート表示）— PW変更等で使用 */
   .pop-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
   .pop-overlay.open { display:flex; }
@@ -340,51 +341,24 @@
       </div>
     </div>
     <div class="toolbar" id="playerToolbar">
-      <button class="tb-gold" id="addBtn" onclick="openAdd()" style="display:none;">＋ 選手追加</button>
+      <button class="tb-gold" id="addBtn" onclick="openAddInDetail()" style="display:none;">＋ 選手追加</button>
       <button class="tb-red" id="promotionBtn" onclick="showPromotion()" style="display:none;">🎓 新年度一括進級</button>
       <button class="tb-gold" id="playerExcelBtn" onclick="exportPlayerExcel()" style="display:none;font-size:11px;">📊 選手Excel出力</button>
     </div>
-    <!-- 選手追加/編集フォーム -->
-    <div class="modal-bg" id="addModal">
-      <div class="modal">
-        <h3 id="addModalTitle">選手を追加</h3>
-        <label>名前（漢字）<span style="color:#c00;">*</span></label><input type="text" id="fName" placeholder="例：山田太郎">
-        <label>フリガナ（ローマ字）</label><input type="text" id="fRoman" placeholder="例：YAMADA TARO">
-        <label>学年<span style="color:#c00;">*</span></label>
-        <select id="fGrade">
-          <option value="6">6年生</option><option value="5">5年生</option><option value="4">4年生</option>
-          <option value="3">3年生</option><option value="2">2年生</option><option value="1">1年生</option>
-        </select>
-        <label>背番号</label><input type="number" id="fNumber" placeholder="例：7">
-        <label>身長 (cm)</label><input type="number" id="fHeight" placeholder="例：140">
-        <label>ビブス番号</label><input type="number" id="fBibsNumber" placeholder="例：11">
-        <label>ビブス所有<span style="color:#c00;">*</span></label>
-        <select id="fBibsOwn">
-          <option value="team">チーム貸出</option>
-          <option value="personal">個人購入</option>
-        </select>
-        <label>ボール<span style="color:#c00;">*</span></label>
-        <select id="fBallType" onchange="toggleBallNumber()">
-          <option value="team">チーム貸出</option>
-          <option value="personal">マイボール（個人所有）</option>
-        </select>
-        <div id="ballNumberBox"><label>チーム貸出ボール番号</label><input type="text" id="fBallNumber" placeholder="例：7 または A-3"></div>
-        <label>写真</label><input type="file" id="fPhoto" accept="image/*">
-        <div class="modal-btns">
-          <button class="btn-cancel" onclick="closeAdd()">✕ キャンセル</button>
-          <button class="btn-submit" id="addSubmitBtn" onclick="savePlayer()">追加する</button>
-        </div>
-      </div>
-    </div>
+    <!-- 旧選手追加/編集フォーム（addModal）は詳細モーダル方式に統合されたため削除 -->
 
     <!-- 選手詳細モーダル（画面中央フロート表示） -->
     <div class="detail-overlay" id="detailModal">
       <div class="modal">
         <div id="detailContent"></div>
-        <div class="modal-btns">
+        <div class="modal-btns" id="detailBtnsView">
           <button class="btn-cancel" onclick="closeDetail()">✕ 閉じる</button>
-          <button class="btn-submit" id="detailEditBtn" onclick="editFromDetail()" style="display:none;">✏️ 編集</button>
+          <button class="btn-submit" id="detailEditBtn" onclick="switchToEditMode()" style="display:none;">✏️ 編集</button>
           <button class="btn-delete" id="detailDeleteBtn" onclick="deletePlayer()" style="display:none;">🗑️ 削除</button>
+        </div>
+        <div class="modal-btns" id="detailBtnsEdit" style="display:none;">
+          <button class="btn-cancel" onclick="switchToViewMode()">✕ キャンセル</button>
+          <button class="btn-submit" onclick="savePlayer()">💾 保存する</button>
         </div>
       </div>
     </div>
@@ -427,9 +401,9 @@
 
   <!-- 日程タブ -->
   <div id="view-schedule" style="display:none;">
-    <!-- 日程入力フォーム（インライン） -->
-    <div class="modal-bg" id="scheduleModal">
-      <div class="modal">
+    <!-- 日程入力フォーム（オーバーレイ・ポップアップ） -->
+    <div class="modal-bg" id="scheduleModal" onclick="if(event.target===this)closeScheduleModal();">
+      <div class="modal" onclick="event.stopPropagation();">
         <h3 id="scheduleModalTitle">予定を追加</h3>
         <label>日付</label><input type="date" id="sDate">
         <label>種別</label>
@@ -451,8 +425,8 @@
     </div>
     <!-- PW変更フォームはapp直下に移動済み -->
     <!-- Excel出力フォーム（管理者のみ） -->
-    <div class="modal-bg" id="excelModal">
-      <div class="modal">
+    <div class="modal-bg" id="excelModal" onclick="if(event.target===this)closeExcelModal();">
+      <div class="modal" onclick="event.stopPropagation();">
         <h3>📊 日程をExcel出力</h3>
         <label>開始日</label><input type="date" id="excelFrom">
         <label>終了日</label><input type="date" id="excelTo">
@@ -488,9 +462,9 @@
     <div class="toolbar">
       <button class="tb-gold" id="addInfoBtn" onclick="openInfoModal(null)" style="display:none;">＋ インフォ投稿</button>
     </div>
-    <!-- インフォ入力フォーム（インライン） -->
-    <div id="infoModal" class="modal-bg">
-      <div class="modal">
+    <!-- インフォ入力フォーム（オーバーレイ・ポップアップ） -->
+    <div id="infoModal" class="modal-bg" onclick="if(event.target===this)closeInfoModal();">
+      <div class="modal" onclick="event.stopPropagation();">
         <h3 id="infoModalTitle">インフォを投稿</h3>
         <label>投稿者</label>
         <select id="iFrom">
@@ -695,28 +669,10 @@ function filterGrade(g){
 }
 // 編集中の選手ID（nullなら新規追加）
 let editingPlayerId=null;
-function openAdd(){
-  editingPlayerId=null;
-  document.getElementById('addModalTitle').textContent='選手を追加';
-  document.getElementById('addSubmitBtn').textContent='追加する';
-  // フォーム初期化
-  document.getElementById('fName').value='';
-  document.getElementById('fRoman').value='';
-  document.getElementById('fGrade').value='1';
-  document.getElementById('fNumber').value='';
-  document.getElementById('fHeight').value='';
-  document.getElementById('fBibsNumber').value='';
-  document.getElementById('fBibsOwn').value='team';
-  document.getElementById('fBallType').value='team';
-  document.getElementById('fBallNumber').value='';
-  document.getElementById('fPhoto').value='';
-  toggleBallNumber();
-  document.getElementById('addModal').style.display='block';
-}
-function closeAdd(){
-  document.getElementById('addModal').style.display='none';
-  editingPlayerId=null;
-}
+// 旧addModal互換のno-op（詳細モーダル方式に統合したため実体は不要）
+// 既存のコードから呼ばれても安全にスルーする
+function openAdd(){ openAddInDetail(); }
+function closeAdd(){ /* 旧addModalは削除済み。新方式ではcloseDetailを使用 */ }
 // ボール種別に応じてチーム貸出番号入力欄の表示切替
 function toggleBallNumber(){
   const t=document.getElementById('fBallType').value;
@@ -727,6 +683,13 @@ function toggleBallNumber(){
 let currentDetailId=null;
 function gradeLabel(g){ return g+'年生'; }
 function bibsOwnLabel(v){ return v==='personal'?'個人購入':'チーム貸出'; }
+// HTMLエスケープ（XSS対策＋ユーザー入力の特殊文字を安全に表示）
+function escapeHtml(str){
+  if(str===null||str===undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function ballTypeLabel(p){
   if(p.ballType==='personal') return 'マイボール';
   return 'チーム貸出'+(p.ballNumber?`（No.${p.ballNumber}）`:'');
@@ -771,6 +734,12 @@ function closeDetail(){
   document.getElementById('detailModal').classList.remove('open');
   document.body.style.overflow='';
   currentDetailId=null;
+  editingPlayerId=null;
+  // ボタン表示を元の状態（表示モード）に戻す
+  const bv=document.getElementById('detailBtnsView');
+  const be=document.getElementById('detailBtnsEdit');
+  if(bv) bv.style.display='flex';
+  if(be) be.style.display='none';
 }
 async function deletePlayer(){
   if(!currentDetailId) return;
@@ -813,51 +782,168 @@ function savePlayer(){
     };
     try{
       if(editingPlayerId){
-        // 編集：既存IDを上書き
+        // 編集：既存IDを上書き → 詳細モーダルを表示モードに戻す
         await db.collection('players').doc(editingPlayerId).set(data);
+        // 編集後は同じ選手の詳細表示に戻る
+        currentDetailId=editingPlayerId;
+        editingPlayerId=null;
+        // Firestore同期で最新が来るまで待たずに即座に表示を更新
+        const idx=players.findIndex(p=>p.id===currentDetailId);
+        if(idx>=0) players[idx]={id:currentDetailId, ...data};
+        switchToViewMode();
       } else {
-        // 新規追加：自動ID
+        // 新規追加：自動ID → 詳細モーダルを閉じる
         await db.collection('players').add(data);
+        closeDetail();
+        // 旧addModalも念のため閉じる（互換性のため）
+        closeAdd();
       }
-      closeAdd();
     } catch(e){
       alert('保存に失敗しました: '+e.message);
       console.error(e);
     }
   };
   if(file){
-    const r=new FileReader();
-    r.onload=e=>commit(e.target.result);
-    r.readAsDataURL(file);
+    // 写真を自動リサイズ・圧縮（長辺800px、JPEG品質80%で ~100KB程度に圧縮）
+    resizeImage(file, 800, 0.8).then(dataUrl=>{
+      commit(dataUrl);
+    }).catch(err=>{
+      alert('写真の処理に失敗しました: '+err.message);
+      console.error(err);
+    });
   } else {
     // 編集時かつファイル未選択 → 既存写真を残す（nullを渡すと既存を維持）
     commit(editingPlayerId ? null : '');
   }
 }
 
-// 詳細モーダルから編集モーダルへ
-function editFromDetail(){
+// 画像を自動リサイズ・圧縮する関数
+// - 長辺を maxSize に収める（アスペクト比は保持）
+// - JPEGに変換して quality で圧縮（base64 DataURLで返す）
+function resizeImage(file, maxSize, quality){
+  return new Promise((resolve, reject)=>{
+    if(!file.type.startsWith('image/')){ reject(new Error('画像ファイルではありません')); return; }
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error('ファイル読み込みに失敗しました'));
+    reader.onload=e=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error('画像の読み込みに失敗しました'));
+      img.onload=()=>{
+        let w=img.width, h=img.height;
+        // 長辺が maxSize を超えていたらリサイズ
+        if(w>maxSize || h>maxSize){
+          if(w>=h){ h=Math.round(h*maxSize/w); w=maxSize; }
+          else    { w=Math.round(w*maxSize/h); h=maxSize; }
+        }
+        const canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        // JPEGで出力（PNGの透過は失うが大幅に軽量化、選手写真なので問題なし）
+        const dataUrl=canvas.toDataURL('image/jpeg', quality);
+        // 念のためサイズチェック：900KB超えなら再圧縮
+        const approxBytes=Math.ceil(dataUrl.length*3/4);
+        if(approxBytes>900*1024){
+          const dataUrl2=canvas.toDataURL('image/jpeg', 0.6);
+          resolve(dataUrl2);
+        } else {
+          resolve(dataUrl);
+        }
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// 詳細モーダル内で「表示モード」「編集モード」を切り替え
+// 編集モードに切り替え：現在の選手情報をフォームに展開
+function switchToEditMode(){
   if(!currentDetailId) return;
   const p=players.find(x=>x.id===currentDetailId); if(!p) return;
   editingPlayerId=p.id;
-  // フォームに値を流し込む
-  document.getElementById('fName').value=p.name||'';
-  document.getElementById('fRoman').value=p.roman||'';
-  document.getElementById('fGrade').value=String(p.grade||1);
-  document.getElementById('fNumber').value=p.number||'';
-  document.getElementById('fHeight').value=p.height||'';
-  document.getElementById('fBibsNumber').value=p.bibsNumber||'';
-  document.getElementById('fBibsOwn').value=p.bibsOwn||'team';
-  document.getElementById('fBallType').value=p.ballType||'team';
-  document.getElementById('fBallNumber').value=p.ballNumber||'';
-  document.getElementById('fPhoto').value='';
-  toggleBallNumber();
-  document.getElementById('addModalTitle').textContent='選手を編集';
-  document.getElementById('addSubmitBtn').textContent='保存する';
-  // 詳細を閉じて編集モーダルを開く
-  closeDetail();
-  document.getElementById('addModal').style.display='block';
+  renderEditForm(p);
+  document.getElementById('detailBtnsView').style.display='none';
+  document.getElementById('detailBtnsEdit').style.display='flex';
 }
+// 表示モードに戻す（キャンセル）
+function switchToViewMode(){
+  if(!currentDetailId){ closeDetail(); return; }
+  editingPlayerId=null;
+  openDetail(currentDetailId); // 詳細表示を再描画
+  document.getElementById('detailBtnsView').style.display='flex';
+  document.getElementById('detailBtnsEdit').style.display='none';
+}
+// 編集フォームHTMLをdetailContentに流し込む（新規追加フォームと同じ入力IDを使用）
+function renderEditForm(p){
+  const isNew=!p;
+  const title=isNew?'選手を追加':'選手を編集';
+  document.getElementById('detailContent').innerHTML=`
+    <div style="background:#111;padding:16px;color:#fff;">
+      <div style="font-size:18px;font-weight:900;">${title}</div>
+    </div>
+    <div style="padding:16px;">
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">名前（漢字）<span style="color:#c00;">*</span></label>
+      <input type="text" id="fName" placeholder="例：山田太郎" value="${escapeHtml(p?.name||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);color:var(--color-text-primary);font-size:13px;box-sizing:border-box;">
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">フリガナ（ローマ字）</label>
+      <input type="text" id="fRoman" placeholder="例：YAMADA TARO" value="${escapeHtml(p?.roman||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">学年<span style="color:#c00;">*</span></label>
+      <select id="fGrade" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+        ${[6,5,4,3,2,1].map(g=>`<option value="${g}" ${p&&p.grade===g?'selected':''}>${g}年生</option>`).join('')}
+      </select>
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">背番号</label>
+      <input type="number" id="fNumber" placeholder="例：7" value="${p?.number||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">身長 (cm)</label>
+      <input type="number" id="fHeight" placeholder="例：140" value="${p?.height||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス番号</label>
+      <input type="number" id="fBibsNumber" placeholder="例：11" value="${p?.bibsNumber||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス所有<span style="color:#c00;">*</span></label>
+      <select id="fBibsOwn" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+        <option value="personal" ${(!p||p.bibsOwn==='personal')?'selected':''}>個人購入</option>
+        <option value="team" ${p&&p.bibsOwn==='team'?'selected':''}>チーム貸出</option>
+      </select>
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ボール<span style="color:#c00;">*</span></label>
+      <select id="fBallType" onchange="toggleBallNumber()" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+        <option value="team" ${(!p||p.ballType==='team')?'selected':''}>チーム貸出</option>
+        <option value="personal" ${p&&p.ballType==='personal'?'selected':''}>マイボール（個人所有）</option>
+      </select>
+
+      <div id="ballNumberBox" style="${p&&p.ballType==='personal'?'display:none;':''}">
+        <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">チーム貸出ボール番号</label>
+        <input type="text" id="fBallNumber" placeholder="例：7 または A-3" value="${escapeHtml(p?.ballNumber||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      </div>
+
+      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">写真</label>
+      <input type="file" id="fPhoto" accept="image/*" style="width:100%;font-size:13px;">
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:4px;">※ 写真は自動で縮小されます（長辺800px、約100KBに圧縮）</div>
+      ${p?.photo?`<div style="margin-top:8px;"><div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:4px;">現在の写真：</div><img src="${p.photo}" style="max-width:120px;max-height:120px;border-radius:8px;"></div>`:''}
+    </div>
+  `;
+}
+
+// 詳細モーダルを「追加」モードで開く（管理者専用：＋選手追加ボタンから）
+function openAddInDetail(){
+  if(!isAdmin) return;
+  currentDetailId='__new__';
+  editingPlayerId=null;
+  renderEditForm(null);
+  document.getElementById('detailBtnsView').style.display='none';
+  document.getElementById('detailBtnsEdit').style.display='flex';
+  const overlay=document.getElementById('detailModal');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  overlay.onclick=(e)=>{ if(e.target===overlay) closeDetail(); };
+}
+
+// 旧：editFromDetail（互換のため残す・switchToEditModeへ委譲）
+function editFromDetail(){ switchToEditMode(); }
 // ボール検索クリア
 function clearBallSearch(){
   document.getElementById('searchBall').value='';
@@ -881,8 +967,9 @@ function renderPlayers(){
   // ソート
   const sortBy=document.getElementById('sortBy')?document.getElementById('sortBy').value:'grade';
   const sorters={
-    grade:  (a,b)=>(a.grade-b.grade)||((a.number||999)-(b.number||999)),
-    number: (a,b)=>((a.number||999)-(b.number||999))||(a.grade-b.grade),
+    // 学年順：6年生から1年生へ（降順）。同学年内は背番号昇順
+    grade:  (a,b)=>(b.grade-a.grade)||((a.number||999)-(b.number||999)),
+    number: (a,b)=>((a.number||999)-(b.number||999))||(b.grade-a.grade),
     // ボール番号順：マイボール組（番号なし）は末尾に。番号は数値として比較（"7"<"12" を正しく処理）
     ball:   (a,b)=>{
       const av=(a.ballType==='team' && a.ballNumber!=='') ? parseInt(a.ballNumber,10) : Infinity;
@@ -890,14 +977,14 @@ function renderPlayers(){
       // parseIntで NaN になる場合（例：A-3）は文字列扱いで末尾近くに
       const aSafe=isNaN(av)?9999:av;
       const bSafe=isNaN(bv)?9999:bv;
-      return (aSafe-bSafe)||(a.grade-b.grade);
+      return (aSafe-bSafe)||(b.grade-a.grade);
     },
     bibs:   (a,b)=>{
       const av=a.bibsNumber?parseInt(a.bibsNumber,10):Infinity;
       const bv=b.bibsNumber?parseInt(b.bibsNumber,10):Infinity;
       const aSafe=isNaN(av)?9999:av;
       const bSafe=isNaN(bv)?9999:bv;
-      return (aSafe-bSafe)||(a.grade-b.grade);
+      return (aSafe-bSafe)||(b.grade-a.grade);
     }
   };
   list.sort(sorters[sortBy]||sorters.grade);
@@ -921,8 +1008,15 @@ function renderPlayers(){
   }
 
   document.getElementById('grid').innerHTML=list.map(p=>{
-    const ballTxt=(p.ballType==='personal')?'マイボール':('貸出'+(p.ballNumber?`#${p.ballNumber}`:''));
-    const bibsTxt=(p.bibsOwn==='personal')?'ビブス:個人':'ビブス:貸出'+(p.bibsNumber?`#${p.bibsNumber}`:'');
+    // ボール表示：個人はマイボール、貸出は「ボール貸出NO〇〇」（番号なしは「ボール貸出」）
+    const ballTxt=(p.ballType==='personal')
+      ? 'マイボール'
+      : 'ボール貸出'+(p.ballNumber?`NO${p.ballNumber}`:'');
+    // ビブス表示：番号ありなら「ビブスNO〇：個人/貸出」、番号なしなら従来通り
+    const bibsOwnTxt=(p.bibsOwn==='personal')?'個人':'貸出';
+    const bibsTxt=p.bibsNumber
+      ? `ビブスNO${p.bibsNumber}：${bibsOwnTxt}`
+      : `ビブス：${bibsOwnTxt}`;
     return `
     <div class="card" onclick="openDetail('${p.id}')">
       <div class="card-accent"></div>
@@ -1082,9 +1176,9 @@ function renderScheduleList(){
       </div>
       <div class="schedule-info">
         <span class="schedule-type ${TYPE_CLASS[s.type]}">${TYPE_LABEL[s.type]}</span>
-        <div class="schedule-title">${s.title}</div>
-        <div class="schedule-detail">${timeStr}${s.place||''}</div>
-        ${s.memo?`<div class="schedule-detail" style="margin-top:2px;">${s.memo}</div>`:''}
+        <div class="schedule-title">${escapeHtml(s.title)}</div>
+        <div class="schedule-detail">${timeStr}${escapeHtml(s.place||'')}</div>
+        ${s.memo?`<div class="schedule-detail" style="margin-top:2px;white-space:pre-wrap;">${escapeHtml(s.memo)}</div>`:''}
       </div>
       ${editBtn}
     </div>`;
@@ -1102,7 +1196,7 @@ function openScheduleModal(dateStr){
   document.getElementById('sPlace').value='';
   document.getElementById('sMemo').value='';
   document.getElementById('sDeleteBtn').style.display='none';
-  document.getElementById('scheduleModal').style.display='block';
+  document.getElementById('scheduleModal').classList.add('open');
 }
 function editSchedule(id){
   if(!isAdmin) return;
@@ -1119,9 +1213,9 @@ function editSchedule(id){
   const delBtn=document.getElementById('sDeleteBtn');
   delBtn.style.display='block';
   delBtn.style.flex='1';
-  document.getElementById('scheduleModal').style.display='block';
+  document.getElementById('scheduleModal').classList.add('open');
 }
-function closeScheduleModal(){ document.getElementById('scheduleModal').style.display='none'; }
+function closeScheduleModal(){ document.getElementById('scheduleModal').classList.remove('open'); }
 async function deleteSchedule(){
   if(!editingScheduleId){ alert('削除対象がありません'); return; }
   try{
@@ -1141,9 +1235,9 @@ function openExcelModal(){
   const y=new Date().getFullYear();
   document.getElementById('excelFrom').value=`${y}-01-01`;
   document.getElementById('excelTo').value=`${y}-12-31`;
-  document.getElementById('excelModal').style.display='block';
+  document.getElementById('excelModal').classList.add('open');
 }
-function closeExcelModal(){ document.getElementById('excelModal').style.display='none'; }
+function closeExcelModal(){ document.getElementById('excelModal').classList.remove('open'); }
 function exportExcel(){
   const from=document.getElementById('excelFrom').value;
   const to=document.getElementById('excelTo').value;
@@ -1297,9 +1391,9 @@ function openInfoModal(id){
     document.getElementById('iBody').value='';
     document.getElementById('iDeleteBtn').style.display='none';
   }
-  document.getElementById('infoModal').style.display='block';
+  document.getElementById('infoModal').classList.add('open');
 }
-function closeInfoModal(){ document.getElementById('infoModal').style.display='none'; }
+function closeInfoModal(){ document.getElementById('infoModal').classList.remove('open'); }
 async function saveInfo(){
   const title=document.getElementById('iTitle').value.trim();
   const body=document.getElementById('iBody').value.trim();
