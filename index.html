@@ -36,7 +36,8 @@
   .admin-btn-header:active { transform:scale(0.96); }
   .admin-btn-header.logout { border-color:#e24b4a; color:#e24b4a; background:#2a1414; }
   .admin-btn-header.logout:hover { background:#e24b4a; color:#fff; }
-  .team-logo { width:48px; height:48px; border-radius:8px; background:var(--theme-main); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:8px; color:var(--theme-text-on); text-align:center; line-height:1.3; flex-shrink:0; }
+  .team-logo { width:48px; height:48px; border-radius:8px; background:var(--theme-main); display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; padding:3px; box-sizing:border-box; }
+  .team-logo img { width:100%; height:100%; object-fit:contain; display:block; }
   .team-name { color:var(--theme-main); font-size:18px; font-weight:900; letter-spacing:1px; }
   .team-sub { color:#888; font-size:10px; letter-spacing:2px; }
   .header-stripe { height:3px; background:linear-gradient(90deg,var(--theme-main),var(--theme-light),var(--theme-main)); }
@@ -76,10 +77,13 @@
   /* ボール番号検索カード */
   .ball-search-card { margin:10px 12px; padding:10px 12px; background:#fff8e1; border:1.5px solid var(--theme-main); border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
   .ball-search-label { font-size:12px; font-weight:700; color:var(--theme-dark); margin-bottom:6px; letter-spacing:0.5px; }
-  .search-box { position:relative; display:flex; align-items:center; }
-  .search-box input { width:100%; padding:9px 36px 9px 14px; border:1px solid var(--theme-main); border-radius:8px; background:#fff; color:#111; font-size:15px; font-weight:700; font-family:inherit; box-sizing:border-box; }
+  .search-box { position:relative; display:flex; align-items:center; gap:8px; }
+  .search-box input { flex:1; min-width:0; padding:9px 14px; border:1px solid var(--theme-main); border-radius:8px; background:#fff; color:#111; font-size:15px; font-weight:700; font-family:inherit; box-sizing:border-box; }
   .search-box input:focus { outline:none; border-color:var(--theme-dark); box-shadow:0 0 0 2px rgba(201,168,76,0.2); }
-  .search-clear { position:absolute; right:6px; top:50%; transform:translateY(-50%); width:26px; height:26px; border-radius:50%; border:none; background:#888; color:#fff; font-size:11px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
+  .search-go { flex-shrink:0; width:42px; height:38px; border-radius:8px; border:none; background:var(--theme-main); color:var(--theme-text-on); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
+  .search-go:hover { background:var(--theme-dark); }
+  .search-go:active { transform:scale(0.95); }
+  .search-clear { flex-shrink:0; width:38px; height:38px; border-radius:8px; border:none; background:#888; color:#fff; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
   .search-clear:hover { background:#555; }
 
   /* 並べ替えプルダウン（grade-bar右端） */
@@ -139,8 +143,11 @@
   .ev-game { background:#3b82f6; color:#fff; }
   .ev-tournament { background:#dc2626; color:#fff; }
   .ev-other { background:#6b7280; color:#fff; }
-  .schedule-list { margin-top:14px; }
-  .schedule-item { background:var(--color-background-primary); border-radius:12px; border:0.5px solid var(--color-border-tertiary); padding:12px 14px; margin-bottom:8px; display:flex; gap:12px; align-items:flex-start; }
+  .schedule-list { margin-top:14px; padding:14px 12px; background:#fffaeb; border-radius:14px; border:1.5px solid var(--theme-main); box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .schedule-list:empty, .schedule-list > div:only-child { /* 空のときはbox-shadowを薄く保つだけ */ }
+  .schedule-list-title { font-size:13px; font-weight:700; color:var(--theme-dark); margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed var(--theme-light); display:flex; align-items:center; gap:6px; }
+  .schedule-item { background:#ffffff; border-radius:10px; border:1px solid var(--theme-light); padding:12px 14px; margin-bottom:8px; display:flex; gap:12px; align-items:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
+  .schedule-item:last-child { margin-bottom:0; }
   .schedule-date-box { text-align:center; min-width:40px; }
   .schedule-month { font-size:10px; color:var(--color-text-secondary); }
   .schedule-day { font-size:22px; font-weight:700; color:var(--theme-main); line-height:1; }
@@ -258,7 +265,7 @@
 
 <div class="pw-screen" id="pwScreen">
   <div class="pw-box">
-    <div style="width:56px;height:56px;border-radius:8px;background:var(--theme-main);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:8px;color:var(--theme-text-on);text-align:center;line-height:1.3;margin:0 auto 12px;">KAMIICHI<br>ANTELOPES</div>
+    <div style="width:64px;height:64px;border-radius:10px;background:var(--theme-main);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;overflow:hidden;padding:4px;box-sizing:border-box;"><img src="icon-180.png" alt="アンテロープス" style="width:100%;height:100%;object-fit:contain;display:block;"></div>
     <div class="pw-title">ANTELOPES</div>
     <div class="pw-sub">パスワードを入力してください</div>
     <div class="pin-disp" id="pinDisp">- - - -</div>
@@ -276,7 +283,7 @@
   <div class="header">
     <div class="header-inner">
       <div class="header-left">
-        <div class="team-logo">KAMIICHI<br>ANTELOPES</div>
+        <div class="team-logo"><img src="icon-180.png" alt="アンテロープス"></div>
         <div>
           <div class="team-name">ANTELOPES</div>
           <div class="team-sub">BASKETBALL CLUB · KAMIICHI</div>
@@ -374,7 +381,9 @@
     <div class="ball-search-card">
       <div class="ball-search-label">🏀 チームボール番号検索</div>
       <div class="search-box">
-        <input type="number" id="searchBall" placeholder="例：12" oninput="renderPlayers()" min="0">
+        <input type="number" id="searchBall" placeholder="番号を入力してEnter" min="0"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();executeBallSearch();}">
+        <button class="search-go" onclick="executeBallSearch()" title="検索">🔍</button>
         <button class="search-clear" id="searchClearBtn" onclick="clearBallSearch()" style="display:none;" title="クリア">✕</button>
       </div>
     </div>
@@ -715,7 +724,7 @@ function openDetail(id){
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);width:40%;border-bottom:0.5px solid var(--color-border-tertiary);">学年</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${gradeLabel(p.grade)}</td></tr>
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">背番号</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.number?'#'+p.number:'-'}</td></tr>
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">身長</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.height?p.height+' cm':'-'}</td></tr>
-        <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">ビブス番号</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.bibsNumber?'#'+p.bibsNumber:'-'}</td></tr>
+        <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">ビブス番号</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.bibsNumber?'No.'+p.bibsNumber:'-'}</td></tr>
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">ビブス所有</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${bibsOwnLabel(p.bibsOwn)}</td></tr>
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);">ボール</td><td style="padding:8px 0;font-weight:700;">${ballTypeLabel(p)}</td></tr>
       </table>
@@ -763,7 +772,10 @@ function savePlayer(){
   if(!grade){ alert('学年を選択してください'); return; }
   const number=document.getElementById('fNumber').value;
   const height=document.getElementById('fHeight').value;
-  const bibsNumber=document.getElementById('fBibsNumber').value;
+  // ビブス番号：数字のみを残す（"00"のような先頭ゼロも保持するためtype=textで扱う）
+  let bibsNumber=document.getElementById('fBibsNumber').value.trim().replace(/[^0-9]/g,'');
+  // 入力欄に反映（不正文字を消した結果を見せる）
+  document.getElementById('fBibsNumber').value=bibsNumber;
   const bibsOwn=document.getElementById('fBibsOwn').value;
   const ballType=document.getElementById('fBallType').value;
   const ballNumber=document.getElementById('fBallNumber').value.trim();
@@ -901,7 +913,7 @@ function renderEditForm(p){
       <input type="number" id="fHeight" placeholder="例：140" value="${p?.height||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
 
       <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス番号</label>
-      <input type="number" id="fBibsNumber" placeholder="例：11" value="${p?.bibsNumber||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <input type="text" id="fBibsNumber" inputmode="numeric" pattern="[0-9]*" placeholder="例：11、0、00" value="${escapeHtml(p?.bibsNumber||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
 
       <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス所有<span style="color:#c00;">*</span></label>
       <select id="fBibsOwn" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
@@ -944,6 +956,15 @@ function openAddInDetail(){
 
 // 旧：editFromDetail（互換のため残す・switchToEditModeへ委譲）
 function editFromDetail(){ switchToEditMode(); }
+// ボール検索を実行（Enter または 検索ボタン押下時に呼ばれる）
+function executeBallSearch(){
+  // 検索ワードが空ならクリア扱い、入っていれば検索結果を描画
+  // renderPlayers内で値を見て絞り込むので、ここでは描画を呼ぶだけでOK
+  renderPlayers();
+  // 検索後、フォーカスを外してスマホのキーボードを閉じる
+  const inp=document.getElementById('searchBall');
+  if(inp) inp.blur();
+}
 // ボール検索クリア
 function clearBallSearch(){
   document.getElementById('searchBall').value='';
@@ -984,7 +1005,9 @@ function renderPlayers(){
       const bv=b.bibsNumber?parseInt(b.bibsNumber,10):Infinity;
       const aSafe=isNaN(av)?9999:av;
       const bSafe=isNaN(bv)?9999:bv;
-      return (aSafe-bSafe)||(b.grade-a.grade);
+      // 数値が同じなら、桁数の長い方（"00" > "0"）を先に表示
+      const lenDiff=(b.bibsNumber||'').length-(a.bibsNumber||'').length;
+      return (aSafe-bSafe)||lenDiff||(b.grade-a.grade);
     }
   };
   list.sort(sorters[sortBy]||sorters.grade);
@@ -1008,14 +1031,14 @@ function renderPlayers(){
   }
 
   document.getElementById('grid').innerHTML=list.map(p=>{
-    // ボール表示：個人はマイボール、貸出は「ボール貸出NO〇〇」（番号なしは「ボール貸出」）
+    // ボール表示：個人はマイボール、貸出は「ボール貸出No〇〇」（番号なしは「ボール貸出」）
     const ballTxt=(p.ballType==='personal')
       ? 'マイボール'
-      : 'ボール貸出'+(p.ballNumber?`NO${p.ballNumber}`:'');
-    // ビブス表示：番号ありなら「ビブスNO〇：個人/貸出」、番号なしなら従来通り
+      : 'ボール貸出'+(p.ballNumber?`No${p.ballNumber}`:'');
+    // ビブス表示：番号ありなら「ビブスNo〇：個人/貸出」、番号なしなら従来通り
     const bibsOwnTxt=(p.bibsOwn==='personal')?'個人':'貸出';
     const bibsTxt=p.bibsNumber
-      ? `ビブスNO${p.bibsNumber}：${bibsOwnTxt}`
+      ? `ビブスNo${p.bibsNumber}：${bibsOwnTxt}`
       : `ビブス：${bibsOwnTxt}`;
     return `
     <div class="card" onclick="openDetail('${p.id}')">
@@ -1163,8 +1186,9 @@ function renderCalendar(){
 function renderScheduleList(){
   const y=calYear,m=calMonth;
   const monthEvs=schedules.filter(s=>{ const [sy,sm]=s.date.split('-').map(Number); return sy===y&&sm===m+1; }).sort((a,b)=>a.date.localeCompare(b.date));
-  if(monthEvs.length===0){ document.getElementById('scheduleList').innerHTML=`<div style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">この月の予定はありません</div>`; return; }
-  document.getElementById('scheduleList').innerHTML=monthEvs.map(s=>{
+  const titleHtml=`<div class="schedule-list-title">📋 ${y}年${m+1}月の予定（${monthEvs.length}件）</div>`;
+  if(monthEvs.length===0){ document.getElementById('scheduleList').innerHTML=titleHtml+`<div style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">この月の予定はありません</div>`; return; }
+  document.getElementById('scheduleList').innerHTML=titleHtml+monthEvs.map(s=>{
     const d=new Date(s.date+'T00:00:00');
     const editBtn=isAdmin?`<button class="schedule-edit-btn" onclick="editSchedule('${s.id}')">編集</button>`:'';
     const timeStr=s.start?`${s.start}${s.end?'〜'+s.end:''} `:'';
