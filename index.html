@@ -148,6 +148,10 @@
   .schedule-list-title { font-size:13px; font-weight:700; color:var(--theme-dark); margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed var(--theme-light); display:flex; align-items:center; gap:6px; }
   .schedule-item { background:#ffffff; border-radius:10px; border:1px solid var(--theme-light); padding:12px 14px; margin-bottom:8px; display:flex; gap:12px; align-items:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
   .schedule-item:last-child { margin-bottom:0; }
+  /* 地図リンク（住所/施設名タップでGoogle Maps起動） */
+  .map-link { color:#1565c0; text-decoration:underline; cursor:pointer; font-weight:600; word-break:break-all; }
+  .map-link:hover { color:#0d47a1; }
+  .map-link:active { color:#003c8f; }
   .schedule-date-box { text-align:center; min-width:40px; }
   .schedule-month { font-size:10px; color:var(--color-text-secondary); }
   .schedule-day { font-size:22px; font-weight:700; color:var(--theme-main); line-height:1; }
@@ -424,6 +428,9 @@
         <label>開始時間</label><input type="time" id="sStart">
         <label>終了時間</label><input type="time" id="sEnd">
         <label>場所</label><input type="text" id="sPlace" placeholder="例：上市町体育館">
+        <label>目的地（地図検索用）</label>
+        <input type="text" id="sDestination" placeholder="住所 or 施設名（例：上市町体育館 / 富山県中新川郡上市町〇〇）">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-top:-4px;margin-bottom:8px;">※ 入力するとカレンダーで📍リンクからGoogleマップが開きます</div>
         <label>メモ</label><textarea id="sMemo" placeholder="集合時間・持ち物など"></textarea>
         <div class="modal-btns">
           <button class="btn-cancel" onclick="closeScheduleModal()">キャンセル</button>
@@ -698,6 +705,14 @@ function escapeHtml(str){
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Google Mapsで目的地を開く（住所でも施設名でもOK・APIキー不要）
+function openGoogleMaps(query){
+  if(!query) return;
+  // encodeURIComponentで日本語住所もURLセーフに変換
+  const url='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
+  // 新しいタブ/ウィンドウで開く（スマホはアプリ起動）
+  window.open(url, '_blank');
 }
 function ballTypeLabel(p){
   if(p.ballType==='personal') return 'マイボール';
@@ -1202,6 +1217,7 @@ function renderScheduleList(){
         <span class="schedule-type ${TYPE_CLASS[s.type]}">${TYPE_LABEL[s.type]}</span>
         <div class="schedule-title">${escapeHtml(s.title)}</div>
         <div class="schedule-detail">${timeStr}${escapeHtml(s.place||'')}</div>
+        ${s.destination?`<div class="schedule-detail" style="margin-top:4px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`:''}
         ${s.memo?`<div class="schedule-detail" style="margin-top:2px;white-space:pre-wrap;">${escapeHtml(s.memo)}</div>`:''}
       </div>
       ${editBtn}
@@ -1218,6 +1234,7 @@ function openScheduleModal(dateStr){
   document.getElementById('sStart').value='';
   document.getElementById('sEnd').value='';
   document.getElementById('sPlace').value='';
+  document.getElementById('sDestination').value='';
   document.getElementById('sMemo').value='';
   document.getElementById('sDeleteBtn').style.display='none';
   document.getElementById('scheduleModal').classList.add('open');
@@ -1233,6 +1250,7 @@ function editSchedule(id){
   document.getElementById('sStart').value=s.start||'';
   document.getElementById('sEnd').value=s.end||'';
   document.getElementById('sPlace').value=s.place||'';
+  document.getElementById('sDestination').value=s.destination||'';
   document.getElementById('sMemo').value=s.memo||'';
   const delBtn=document.getElementById('sDeleteBtn');
   delBtn.style.display='block';
@@ -1280,13 +1298,14 @@ function exportExcel(){
       '開始時間':s.start||'',
       '終了時間':s.end||'',
       '場所':s.place||'',
+      '目的地':s.destination||'',
       'メモ':s.memo||''
     };
   });
   // SheetJS でExcel生成
   const ws=XLSX.utils.json_to_sheet(rows);
   // 列幅設定
-  ws['!cols']=[{wch:12},{wch:6},{wch:10},{wch:30},{wch:10},{wch:10},{wch:20},{wch:30}];
+  ws['!cols']=[{wch:12},{wch:6},{wch:10},{wch:30},{wch:10},{wch:10},{wch:20},{wch:30},{wch:30}];
   const wb=XLSX.utils.book_new();
   const label=(from&&to)?`${from}_${to}`:(from?`${from}以降`:(to?`${to}まで`:'全期間'));
   XLSX.utils.book_append_sheet(wb,ws,'日程');
@@ -1320,7 +1339,7 @@ async function saveSchedule(){
   const date=document.getElementById('sDate').value;
   const title=document.getElementById('sTitle').value.trim();
   if(!date||!title){ alert('日付とタイトルを入力してください'); return; }
-  const data={ date, type:document.getElementById('sType').value, title, start:document.getElementById('sStart').value, end:document.getElementById('sEnd').value, place:document.getElementById('sPlace').value.trim(), memo:document.getElementById('sMemo').value.trim() };
+  const data={ date, type:document.getElementById('sType').value, title, start:document.getElementById('sStart').value, end:document.getElementById('sEnd').value, place:document.getElementById('sPlace').value.trim(), destination:document.getElementById('sDestination').value.trim(), memo:document.getElementById('sMemo').value.trim() };
   try{
     if(editingScheduleId){
       await db.collection('schedules').doc(editingScheduleId).set(data);
