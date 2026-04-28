@@ -600,6 +600,29 @@
       </div>
     </div>
   </div>
+
+  <!-- 統一確認モーダル（送信・削除前の最終確認用） -->
+  <div class="modal-bg" id="confirmModal" onclick="if(event.target===this)closeConfirmModal();" style="z-index:10001;">
+    <div class="modal" onclick="event.stopPropagation();" style="max-width:380px;">
+      <h3 id="confirmTitle">確認</h3>
+      <div id="confirmBody" style="font-size:13px;color:var(--color-text-primary);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeConfirmModal()" id="confirmCancelBtn">キャンセル</button>
+        <button class="btn-submit" onclick="execConfirmModal()" id="confirmOkBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 閲覧者用：日程詳細ポップアップ（その日の予定を一覧表示） -->
+  <div class="modal-bg" id="dayDetailModal" onclick="if(event.target===this)closeDayDetailModal();">
+    <div class="modal" onclick="event.stopPropagation();" style="max-width:420px;">
+      <h3 id="dayDetailTitle">予定詳細</h3>
+      <div id="dayDetailBody" style="max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeDayDetailModal()" style="flex:1;">✕ 閉じる</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -640,6 +663,31 @@ let monthlyMessages={};
 // 曜日ヘッダー設定（key: 0(日)〜6(土) → {place, start, end, duty}）
 // duty: 'none' | 'key' | 'goal'  / 'key'=鍵当番1名, 'goal'=ゴール当番3名
 let dowSettings={};
+
+// ========== 統一確認モーダル ==========
+// 送信・削除前に確認ポップアップを出す汎用関数。
+// showConfirmModal({title, body, okLabel, okClass, onOk}) → onOkがOK押下時に実行される。
+let _confirmCallback=null;
+function showConfirmModal(opts){
+  const {title='確認', body='', okLabel='OK', okClass='btn-submit', onOk=()=>{}} = opts||{};
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmBody').textContent=body;
+  const okBtn=document.getElementById('confirmOkBtn');
+  okBtn.textContent=okLabel;
+  // クラスを差し替え（btn-submit / btn-delete スタイル切替用）
+  okBtn.className=okClass;
+  _confirmCallback=onOk;
+  document.getElementById('confirmModal').classList.add('open');
+}
+function closeConfirmModal(){
+  document.getElementById('confirmModal').classList.remove('open');
+  _confirmCallback=null;
+}
+function execConfirmModal(){
+  const cb=_confirmCallback;
+  closeConfirmModal();
+  if(typeof cb==='function') cb();
+}
 
 // Firestoreリアルタイム監視を開始
 function startFirestoreSync(){
@@ -762,22 +810,34 @@ function hidePromotion(){
   document.getElementById('confirmBanner').style.display='none';
 }
 async function executePromotion(){
-  try{
-    const batch=db.batch();
-    // 6年生を削除
-    players.filter(p=>p.grade===6).forEach(p=>{
-      batch.delete(db.collection('players').doc(p.id));
-    });
-    // 残りを+1学年
-    players.filter(p=>p.grade!==6).forEach(p=>{
-      batch.update(db.collection('players').doc(p.id), {grade: p.grade+1});
-    });
-    await batch.commit();
-    hidePromotion();
-  } catch(e){
-    alert('一括進級に失敗しました: '+e.message);
-    console.error(e);
-  }
+  const grade6=players.filter(p=>p.grade===6).length;
+  let bodyMsg=`全選手の学年を+1年します。`;
+  if(grade6>0) bodyMsg+=`\n小学6年生${grade6}名のデータと写真は削除されます。\n\nこの操作は取り消せません。よろしいですか？`;
+  else bodyMsg+=`\n\nこの操作は取り消せません。よろしいですか？`;
+  showConfirmModal({
+    title:'一括進級を実行',
+    body: bodyMsg,
+    okLabel:'🎓 進級する',
+    okClass:'btn-delete',
+    onOk: async ()=>{
+      try{
+        const batch=db.batch();
+        // 6年生を削除
+        players.filter(p=>p.grade===6).forEach(p=>{
+          batch.delete(db.collection('players').doc(p.id));
+        });
+        // 残りを+1学年
+        players.filter(p=>p.grade!==6).forEach(p=>{
+          batch.update(db.collection('players').doc(p.id), {grade: p.grade+1});
+        });
+        await batch.commit();
+        hidePromotion();
+      } catch(e){
+        alert('一括進級に失敗しました: '+e.message);
+        console.error(e);
+      }
+    }
+  });
 }
 
 function filterGrade(g){
@@ -872,14 +932,21 @@ async function deletePlayer(){
   if(!currentDetailId) return;
   const p=players.find(x=>x.id===currentDetailId);
   if(!p) return;
-  if(!confirm(`「${p.name}」を削除しますか？\nこの操作は取り消せません。`)) return;
-  try{
-    await db.collection('players').doc(currentDetailId).delete();
-    closeDetail();
-  } catch(e){
-    alert('削除に失敗しました: '+e.message);
-    console.error(e);
-  }
+  showConfirmModal({
+    title:'選手を削除',
+    body:`「${p.name}」を削除しますか？\nこの操作は取り消せません。`,
+    okLabel:'🗑️ 削除する',
+    okClass:'btn-delete',
+    onOk: async ()=>{
+      try{
+        await db.collection('players').doc(currentDetailId).delete();
+        closeDetail();
+      } catch(e){
+        alert('削除に失敗しました: '+e.message);
+        console.error(e);
+      }
+    }
+  });
 }
 // 追加・編集兼用の保存関数（Firestore）
 function savePlayer(){
@@ -899,6 +966,17 @@ function savePlayer(){
   const ballNumber=document.getElementById('fBallNumber').value.trim();
   const file=document.getElementById('fPhoto').files[0];
 
+  const isEdit=!!editingPlayerId;
+  showConfirmModal({
+    title: isEdit?'選手情報を保存':'選手を追加',
+    body: isEdit?`「${name}」の変更内容を保存します。\nよろしいですか？`:`「${name}」を新規選手として追加します。\nよろしいですか？`,
+    okLabel:'💾 保存する',
+    okClass:'btn-submit',
+    onOk: ()=>_doSavePlayer({name, roman, grade, number, height, bibsNumber, bibsOwn, ballType, ballNumber, file})
+  });
+}
+function _doSavePlayer(args){
+  const {name, roman, grade, number, height, bibsNumber, bibsOwn, ballType, ballNumber, file}=args;
   const commit=async (photo)=>{
     const data={
       name, roman, grade,
@@ -1371,7 +1449,13 @@ function renderCalendar(){
     const dayEvs=schedules.filter(s=>s.date===dateStr);
     const isToday=dateStr===todayStr;
     const holiday=getHolidayName(y, m+1, d);
-    const adminClick=isAdmin?`onclick="openScheduleModal('${dateStr}')"`:'';
+    // クリック処理：管理者は編集モーダル、閲覧者は予定があるときだけ詳細ポップアップ
+    let clickAttr='';
+    if(isAdmin){
+      clickAttr=`onclick="openScheduleModal('${dateStr}')"`;
+    } else if(dayEvs.length>0){
+      clickAttr=`onclick="openDayDetailModal('${dateStr}')"`;
+    }
     const holidayClass=holiday?' holiday':'';
     const holidayLabel=holiday?`<div class="cal-day-holiday-name" title="${holiday}">${holiday}</div>`:'';
     // 当番表示：その日の各イベントから当番情報を抽出して短縮表示
@@ -1385,7 +1469,9 @@ function renderCalendar(){
         }
       }
     });
-    html+=`<div class="cal-day${isToday?' today':''}${holidayClass}" ${adminClick}>
+    // 閲覧者で予定なしの日はカーソルを通常に
+    const cursorStyle=(!isAdmin && dayEvs.length===0)?'style="cursor:default;"':'';
+    html+=`<div class="cal-day${isToday?' today':''}${holidayClass}" ${cursorStyle} ${clickAttr}>
       <div class="cal-day-num">${d}</div>
       ${holidayLabel}
       ${dutyHtml}
@@ -1414,6 +1500,47 @@ function renderMonthlyMessage(){
     bodyEl.textContent='（未設定）';
     bodyEl.classList.add('empty');
   }
+}
+
+// ===== 閲覧者向け：その日の予定詳細ポップアップ =====
+function openDayDetailModal(dateStr){
+  if(!dateStr) return;
+  const dayEvs=schedules.filter(s=>s.date===dateStr).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  if(dayEvs.length===0) return;
+  const dt=new Date(dateStr+'T00:00:00');
+  const titleStr=`${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日（${WEEKDAYS[dt.getDay()]}）の予定`;
+  document.getElementById('dayDetailTitle').textContent=titleStr;
+  // 各予定をカード状に並べる
+  const html=dayEvs.map(s=>{
+    const timeStr=s.start?`${s.start}${s.end?'〜'+s.end:''}`:'';
+    let dutyHtml='';
+    if(s.dutyType && DUTY_INFO[s.dutyType] && Array.isArray(s.duty)){
+      const names=s.duty.filter(n=>n);
+      if(names.length){
+        dutyHtml=`<div style="margin-top:6px;color:#c97a2b;font-weight:700;font-size:12px;">${DUTY_INFO[s.dutyType].label}：${escapeHtml(names.join('・'))}</div>`;
+      }
+    }
+    const destHtml=s.destination
+      ? `<div style="margin-top:4px;font-size:12px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`
+      : '';
+    const memoHtml=s.memo?`<div style="margin-top:6px;font-size:12px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.5;">${escapeHtml(s.memo)}</div>`:'';
+    return `<div style="background:#ffffff;border:1px solid var(--theme-light);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+        <span class="schedule-type ${TYPE_CLASS[s.type]}">${TYPE_LABEL[s.type]}</span>
+        ${timeStr?`<span style="font-size:12px;font-weight:700;color:var(--theme-dark);">${timeStr}</span>`:''}
+      </div>
+      <div style="font-size:14px;font-weight:700;color:var(--color-text-primary);margin-bottom:2px;">${escapeHtml(s.title)}</div>
+      ${s.place?`<div style="font-size:12px;color:var(--color-text-secondary);">${escapeHtml(s.place)}</div>`:''}
+      ${destHtml}
+      ${dutyHtml}
+      ${memoHtml}
+    </div>`;
+  }).join('');
+  document.getElementById('dayDetailBody').innerHTML=html;
+  document.getElementById('dayDetailModal').classList.add('open');
+}
+function closeDayDetailModal(){
+  document.getElementById('dayDetailModal').classList.remove('open');
 }
 
 // 曜日ヘッダー行の描画
@@ -1565,14 +1692,24 @@ function renderDutySection(dateStr, existing){
 function closeScheduleModal(){ document.getElementById('scheduleModal').classList.remove('open'); }
 async function deleteSchedule(){
   if(!editingScheduleId){ alert('削除対象がありません'); return; }
-  try{
-    await db.collection('schedules').doc(editingScheduleId).delete();
-    editingScheduleId=null;
-    closeScheduleModal();
-  } catch(e){
-    alert('削除に失敗しました: '+e.message);
-    console.error(e);
-  }
+  const s=schedules.find(x=>x.id===editingScheduleId);
+  const title=s?s.title:'この予定';
+  showConfirmModal({
+    title:'予定を削除',
+    body:`「${title}」を削除しますか？\nこの操作は取り消せません。`,
+    okLabel:'🗑️ 削除する',
+    okClass:'btn-delete',
+    onOk: async ()=>{
+      try{
+        await db.collection('schedules').doc(editingScheduleId).delete();
+        editingScheduleId=null;
+        closeScheduleModal();
+      } catch(e){
+        alert('削除に失敗しました: '+e.message);
+        console.error(e);
+      }
+    }
+  });
 }
 
 // ===== Excel出力 =====
@@ -1662,17 +1799,26 @@ async function saveSchedule(){
     selects.forEach(sel=>{ duty.push(sel.value||''); });
   }
   const data={ date, type:document.getElementById('sType').value, title, start:document.getElementById('sStart').value, end:document.getElementById('sEnd').value, place:document.getElementById('sPlace').value.trim(), destination:document.getElementById('sDestination').value.trim(), memo:document.getElementById('sMemo').value.trim(), dutyType, duty };
-  try{
-    if(editingScheduleId){
-      await db.collection('schedules').doc(editingScheduleId).set(data);
-    } else {
-      await db.collection('schedules').add(data);
+  const isEdit=!!editingScheduleId;
+  showConfirmModal({
+    title: isEdit?'予定を保存':'予定を追加',
+    body: isEdit?`「${title}」の変更内容を保存します。\nよろしいですか？`:`「${title}」を新規予定として追加します。\nよろしいですか？`,
+    okLabel:'💾 保存する',
+    okClass:'btn-submit',
+    onOk: async ()=>{
+      try{
+        if(editingScheduleId){
+          await db.collection('schedules').doc(editingScheduleId).set(data);
+        } else {
+          await db.collection('schedules').add(data);
+        }
+        closeScheduleModal();
+      } catch(e){
+        alert('保存に失敗しました: '+e.message);
+        console.error(e);
+      }
     }
-    closeScheduleModal();
-  } catch(e){
-    alert('保存に失敗しました: '+e.message);
-    console.error(e);
-  }
+  });
 }
 
 // ===== 月次固定メッセージ =====
@@ -1692,18 +1838,27 @@ async function saveMonthlyMsg(){
   const y=calYear,m=calMonth;
   const key=`${y}-${String(m+1).padStart(2,'0')}`;
   const body=document.getElementById('mMsgBody').value;
-  try{
-    if(body.trim()){
-      await db.collection('monthlyMessages').doc(key).set({body, updatedAt:Date.now()});
-    } else {
-      // 空欄なら削除
-      await db.collection('monthlyMessages').doc(key).delete().catch(()=>{});
+  const isClear=!body.trim();
+  showConfirmModal({
+    title: isClear?'お知らせをクリア':'お知らせを保存',
+    body: isClear?`${y}年${m+1}月のお知らせをクリアします。\nよろしいですか？`:`${y}年${m+1}月のお知らせを保存します。\nよろしいですか？`,
+    okLabel: isClear?'🗑️ クリアする':'💾 保存する',
+    okClass: isClear?'btn-delete':'btn-submit',
+    onOk: async ()=>{
+      try{
+        if(body.trim()){
+          await db.collection('monthlyMessages').doc(key).set({body, updatedAt:Date.now()});
+        } else {
+          // 空欄なら削除
+          await db.collection('monthlyMessages').doc(key).delete().catch(()=>{});
+        }
+        closeMonthlyMsgModal();
+      } catch(e){
+        alert('保存に失敗しました: '+e.message);
+        console.error(e);
+      }
     }
-    closeMonthlyMsgModal();
-  } catch(e){
-    alert('保存に失敗しました: '+e.message);
-    console.error(e);
-  }
+  });
 }
 
 // ===== 曜日ヘッダー設定 =====
@@ -1729,29 +1884,46 @@ async function saveDowSet(){
   const start=document.getElementById('dStart').value;
   const end=document.getElementById('dEnd').value;
   const duty=document.getElementById('dDuty').value;
+  const dowName=DOW_NAMES[editingDow];
   const newSettings={...dowSettings};
   newSettings[String(editingDow)]={place, start, end, duty: duty==='none'?'':duty};
-  try{
-    await db.collection('settings').doc('dow').set(newSettings);
-    closeDowSetModal();
-  } catch(e){
-    alert('保存に失敗しました: '+e.message);
-    console.error(e);
-  }
+  showConfirmModal({
+    title:'曜日設定を保存',
+    body:`${dowName}曜日の固定設定を保存します。\nよろしいですか？`,
+    okLabel:'💾 保存する',
+    okClass:'btn-submit',
+    onOk: async ()=>{
+      try{
+        await db.collection('settings').doc('dow').set(newSettings);
+        closeDowSetModal();
+      } catch(e){
+        alert('保存に失敗しました: '+e.message);
+        console.error(e);
+      }
+    }
+  });
 }
 async function clearDowSet(){
   if(!isAdmin || editingDow===null) return;
-  if(!confirm(DOW_NAMES[editingDow]+'曜日の設定をクリアします。よろしいですか？')) return;
+  const dowName=DOW_NAMES[editingDow];
   const newSettings={...dowSettings};
   delete newSettings[String(editingDow)];
   delete newSettings[editingDow];
-  try{
-    await db.collection('settings').doc('dow').set(newSettings);
-    closeDowSetModal();
-  } catch(e){
-    alert('保存に失敗しました: '+e.message);
-    console.error(e);
-  }
+  showConfirmModal({
+    title:'曜日設定をクリア',
+    body:`${dowName}曜日の固定設定をクリアします。\nよろしいですか？`,
+    okLabel:'🗑️ クリアする',
+    okClass:'btn-delete',
+    onOk: async ()=>{
+      try{
+        await db.collection('settings').doc('dow').set(newSettings);
+        closeDowSetModal();
+      } catch(e){
+        alert('保存に失敗しました: '+e.message);
+        console.error(e);
+      }
+    }
+  });
 }
 
 // ===== インフォメーション =====
@@ -1848,27 +2020,46 @@ async function saveInfo(){
     title, body,
     createdAt:editingInfoId?(infos.find(x=>x.id===editingInfoId)?.createdAt||Date.now()):Date.now()
   };
-  try{
-    if(editingInfoId){
-      await db.collection('infos').doc(editingInfoId).set(data);
-    } else {
-      await db.collection('infos').add(data);
+  const isEdit=!!editingInfoId;
+  showConfirmModal({
+    title: isEdit?'インフォを保存':'インフォを投稿',
+    body: isEdit?`「${title}」の変更内容を保存します。\nよろしいですか？`:`「${title}」を投稿します。\nよろしいですか？`,
+    okLabel: isEdit?'💾 保存する':'📢 投稿する',
+    okClass:'btn-submit',
+    onOk: async ()=>{
+      try{
+        if(editingInfoId){
+          await db.collection('infos').doc(editingInfoId).set(data);
+        } else {
+          await db.collection('infos').add(data);
+        }
+        closeInfoModal();
+      } catch(e){
+        alert('保存に失敗しました: '+e.message);
+        console.error(e);
+      }
     }
-    closeInfoModal();
-  } catch(e){
-    alert('保存に失敗しました: '+e.message);
-    console.error(e);
-  }
+  });
 }
 async function deleteInfo(){
   if(!editingInfoId) return;
-  try{
-    await db.collection('infos').doc(editingInfoId).delete();
-    closeInfoModal();
-  } catch(e){
-    alert('削除に失敗しました: '+e.message);
-    console.error(e);
-  }
+  const info=infos.find(x=>x.id===editingInfoId);
+  const title=info?info.title:'このインフォ';
+  showConfirmModal({
+    title:'インフォを削除',
+    body:`「${title}」を削除しますか？\nこの操作は取り消せません。`,
+    okLabel:'🗑️ 削除する',
+    okClass:'btn-delete',
+    onOk: async ()=>{
+      try{
+        await db.collection('infos').doc(editingInfoId).delete();
+        closeInfoModal();
+      } catch(e){
+        alert('削除に失敗しました: '+e.message);
+        console.error(e);
+      }
+    }
+  });
 }
 
 // ===== パスワード変更 =====
@@ -1896,14 +2087,26 @@ async function savePwChange(){
   if(v) update.view=v;
   if(a) update.admin=a;
   if(Object.keys(update).length===0){ closePwChange(); return; }
-  try{
-    await db.collection('settings').doc('passwords').set(update, {merge:true});
-    closePwChange();
-    alert('パスワードを変更しました');
-  } catch(e){
-    alert('保存に失敗しました: '+e.message);
-    console.error(e);
-  }
+  // 確認文言：何が変わるかを明示
+  const changes=[];
+  if(v) changes.push(`閲覧パス → ${v}`);
+  if(a) changes.push(`管理者パス → ${a}`);
+  showConfirmModal({
+    title:'パスワードを変更',
+    body:`以下のパスワードを変更します。\n\n${changes.join('\n')}\n\nよろしいですか？`,
+    okLabel:'🔑 変更する',
+    okClass:'btn-submit',
+    onOk: async ()=>{
+      try{
+        await db.collection('settings').doc('passwords').set(update, {merge:true});
+        closePwChange();
+        alert('パスワードを変更しました');
+      } catch(e){
+        alert('保存に失敗しました: '+e.message);
+        console.error(e);
+      }
+    }
+  });
 }
 
 // ========== 起動 ==========
