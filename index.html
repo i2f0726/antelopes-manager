@@ -8,6 +8,43 @@
 <meta name="apple-mobile-web-app-title" content="アンテロープス">
 <link rel="apple-touch-icon" href="icon-180.png">
 
+<!-- Service Worker登録（iOS PWAの古いキャッシュ問題を解決） -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => {
+        console.log('[SW] 登録成功');
+
+        // 1時間ごとに更新チェック（PWA起動中ずっと開きっぱなしの場合の保険）
+        setInterval(() => reg.update(), 60 * 60 * 1000);
+
+        // 新しいSWが見つかったら自動適用
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            // 新SWがインストール完了 かつ 既存SWがある = 更新あり
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[SW] 新バージョンを検出、適用します');
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+      })
+      .catch((err) => console.log('[SW] 登録失敗', err));
+
+    // SWが切り替わったらページをリロード（最新版を表示）
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  });
+}
+</script>
+
 <style>
   /* ===== カラーテーマ（ここを変えれば色違い版が作れます） ===== */
   :root {
