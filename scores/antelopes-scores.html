@@ -2,8 +2,19 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Antelopes Scores</title>
+
+<!-- PWA設定（ホーム画面追加・全画面表示） -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+
+<!-- iOS用：ホーム画面追加時の全画面表示・アイコン -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Antelopes">
+<link rel="apple-touch-icon" href="icon-180.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -306,10 +317,6 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
   <div class="login-box" id="loginBox">
     <h3>🔒 ADMIN LOGIN</h3>
     <div style="max-width:280px;margin:0 auto;">
-      <div style="margin-bottom:10px;">
-        <label>メールアドレス</label>
-        <input type="email" id="emailInput" placeholder="admin@example.com" onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
       <div style="margin-bottom:14px;">
         <label>パスワード</label>
         <input type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
@@ -470,9 +477,9 @@ function toast(msg) {
 }
 
 function doLogin() {
-  var email = document.getElementById('emailInput').value.trim();
+  var email = 'admin@antelopes.com'; // 管理者メアド固定
   var pw = document.getElementById('pwInput').value;
-  if (!email || !pw) { toast('⚠️ メールとパスワードを入力してください'); return; }
+  if (!pw) { toast('⚠️ パスワードを入力してください'); return; }
   var btn = document.querySelector('#loginBox .btn');
   btn.textContent = '...';
   btn.disabled = true;
@@ -484,7 +491,7 @@ function doLogin() {
       btn.textContent = 'ログイン';
       btn.disabled = false;
       document.getElementById('pwInput').value = '';
-      toast('❌ ログイン失敗: メールまたはパスワードが違います');
+      toast('❌ ログイン失敗: パスワードが違います');
     });
 }
 
@@ -493,7 +500,6 @@ function doLogout() {
     isAdmin = false;
     document.getElementById('loginBox').style.display = 'block';
     document.getElementById('adminPanel').style.display = 'none';
-    document.getElementById('emailInput').value = '';
     document.getElementById('pwInput').value = '';
     var btn = document.querySelector('#loginBox .btn');
     btn.textContent = 'ログイン';

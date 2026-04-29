@@ -1,13 +1,13 @@
 {
-  "name": "アンテロープス",
-  "short_name": "アンテロープス",
-  "description": "上市ミニバスケットボール アンテロープス",
-  "start_url": "./index.html",
+  "name": "Antelopes Scores",
+  "short_name": "Antelopes",
+  "description": "上市ミニバスケットボール アンテロープス 試合結果",
+  "start_url": "./antelopes-scores.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#c9a84c",
-  "theme_color": "#c9a84c",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "icons": [
     {
       "src": "icon-192.png",
