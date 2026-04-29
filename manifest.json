@@ -3,7 +3,7 @@
   "short_name": "アンテロープス",
   "description": "上市ミニバスケットボール アンテロープス",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#c9a84c",
