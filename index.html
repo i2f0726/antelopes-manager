@@ -195,16 +195,16 @@ if ('serviceWorker' in navigator) {
   .schedule-weekday { font-size:12px; color:var(--color-text-secondary); }
   .schedule-info { flex:1; }
   .schedule-type { font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-block; margin-bottom:4px; }
-  .schedule-title { font-size:16px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; }
-  .schedule-detail { font-size:13px; color:var(--color-text-secondary); }
+  .schedule-title { font-size:19px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; }
+  .schedule-detail { font-size:16px; color:var(--color-text-secondary); }
   .schedule-edit-btn { background:transparent; border:0.5px solid var(--color-border-secondary); border-radius:8px; padding:4px 10px; font-size:13px; cursor:pointer; color:var(--color-text-secondary); font-family:inherit; }
   /* 月次固定メッセージカード */
   .monthly-msg-card { background:#fffaeb; border:1.5px solid var(--theme-main); border-radius:12px; padding:12px 14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
   .monthly-msg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; }
-  .monthly-msg-title { font-size:15px; font-weight:700; color:var(--theme-dark); flex:1; }
+  .monthly-msg-title { font-size:18px; font-weight:700; color:var(--theme-dark); flex:1; }
   .monthly-msg-edit-btn { background:var(--theme-main); color:var(--theme-text-on); border:none; border-radius:8px; padding:5px 12px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
   .monthly-msg-edit-btn:hover { background:var(--theme-dark); }
-  .monthly-msg-body { font-size:14px; color:var(--color-text-primary); white-space:pre-wrap; line-height:1.6; word-break:break-word; }
+  .monthly-msg-body { font-size:17px; color:var(--color-text-primary); white-space:pre-wrap; line-height:1.6; word-break:break-word; }
   .monthly-msg-body.empty { color:var(--color-text-secondary); font-style:italic; }
   /* カレンダー曜日ヘッダーの設定情報（固定会場・時間・当番ラベル） */
   .cal-dow-cell-set { padding:6px 4px; font-size:10px; line-height:1.3; word-break:break-word; }
@@ -618,7 +618,7 @@ if ('serviceWorker' in navigator) {
       </div>
     </div>
     <div style="padding:14px;background:var(--color-background-tertiary);" id="infoList">
-      <div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:15px;">インフォメーションはありません</div>
+      <div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:18px;">インフォメーションはありません</div>
     </div>
   </div>
 
@@ -1554,20 +1554,20 @@ function openDayDetailModal(dateStr){
     if(s.dutyType && DUTY_INFO[s.dutyType] && Array.isArray(s.duty)){
       const names=s.duty.filter(n=>n);
       if(names.length){
-        dutyHtml=`<div style="margin-top:6px;color:#c97a2b;font-weight:700;font-size:14px;">${DUTY_INFO[s.dutyType].label}：${escapeHtml(names.join('・'))}</div>`;
+        dutyHtml=`<div style="margin-top:6px;color:#c97a2b;font-weight:700;font-size:17px;">${DUTY_INFO[s.dutyType].label}：${escapeHtml(names.join('・'))}</div>`;
       }
     }
     const destHtml=s.destination
-      ? `<div style="margin-top:4px;font-size:14px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`
+      ? `<div style="margin-top:4px;font-size:17px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`
       : '';
-    const memoHtml=s.memo?`<div style="margin-top:6px;font-size:14px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.5;">${escapeHtml(s.memo)}</div>`:'';
+    const memoHtml=s.memo?`<div style="margin-top:6px;font-size:17px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.5;">${escapeHtml(s.memo)}</div>`:'';
     return `<div style="background:#ffffff;border:1px solid var(--theme-light);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
         <span class="schedule-type ${TYPE_CLASS[s.type]}">${TYPE_LABEL[s.type]}</span>
-        ${timeStr?`<span style="font-size:14px;font-weight:700;color:var(--theme-dark);">${timeStr}</span>`:''}
+        ${timeStr?`<span style="font-size:17px;font-weight:700;color:var(--theme-dark);">${timeStr}</span>`:''}
       </div>
-      <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:2px;">${escapeHtml(s.title)}</div>
-      ${s.place?`<div style="font-size:14px;color:var(--color-text-secondary);">${escapeHtml(s.place)}</div>`:''}
+      <div style="font-size:19px;font-weight:700;color:var(--color-text-primary);margin-bottom:2px;">${escapeHtml(s.title)}</div>
+      ${s.place?`<div style="font-size:17px;color:var(--color-text-secondary);">${escapeHtml(s.place)}</div>`:''}
       ${destHtml}
       ${dutyHtml}
       ${memoHtml}
@@ -1972,7 +1972,7 @@ function renderInfos(){
   const listEl=document.getElementById('infoList');
   document.getElementById('addInfoBtn').style.display=isAdmin?'block':'none';
   if(!infos.length){
-    listEl.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:15px;">インフォメーションはありません</div>';
+    listEl.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:18px;">インフォメーションはありません</div>';
   } else {
     const sorted=[...infos].sort((a,b)=>b.createdAt-a.createdAt);
     listEl.innerHTML=sorted.map(info=>{
@@ -1984,11 +1984,11 @@ function renderInfos(){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
           <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-              <span style="background:${color};color:#fff;font-size:13px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.5px;">${info.from}</span>
-              <span style="font-size:13px;color:var(--color-text-secondary);">${dateStr}</span>
+              <span style="background:${color};color:#fff;font-size:16px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.5px;">${info.from}</span>
+              <span style="font-size:16px;color:var(--color-text-secondary);">${dateStr}</span>
             </div>
-            <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">${info.title}</div>
-            <div style="font-size:15px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.6;">${info.body}</div>
+            <div style="font-size:19px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">${info.title}</div>
+            <div style="font-size:18px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.6;">${info.body}</div>
           </div>
           ${editBtn}
         </div>
@@ -2008,8 +2008,8 @@ function renderTopInfoBanner(){
   banner.innerHTML=`
     <div style="padding:10px 12px 4px;background:var(--color-background-tertiary);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:13px;font-weight:700;color:var(--color-text-secondary);letter-spacing:1px;">📢 INFORMATION</span>
-        <span onclick="switchTab('info')" style="font-size:13px;color:var(--theme-main);cursor:pointer;font-weight:700;">すべて見る →</span>
+        <span style="font-size:16px;font-weight:700;color:var(--color-text-secondary);letter-spacing:1px;">📢 INFORMATION</span>
+        <span onclick="switchTab('info')" style="font-size:16px;color:var(--theme-main);cursor:pointer;font-weight:700;">すべて見る →</span>
       </div>
       ${items.map(info=>{
         const color=FROM_COLOR[info.from]||'#888';
@@ -2018,11 +2018,11 @@ function renderTopInfoBanner(){
         const bodyPreview=info.body.replace(/\n/g,' ');
         return `<div onclick="switchTab('info')" style="background:var(--color-background-primary);border-radius:10px;border-left:4px solid ${color};padding:10px 14px;margin-bottom:8px;cursor:pointer;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-            <span style="background:${color};color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;">${info.from}</span>
-            <span style="font-size:13px;color:var(--color-text-secondary);">${dateStr}</span>
+            <span style="background:${color};color:#fff;font-size:14px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;">${info.from}</span>
+            <span style="font-size:16px;color:var(--color-text-secondary);">${dateStr}</span>
           </div>
-          <div style="font-size:15px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px;">${info.title}</div>
-          <div style="font-size:14px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bodyPreview}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px;">${info.title}</div>
+          <div style="font-size:17px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bodyPreview}</div>
         </div>`;
       }).join('')}
     </div>
