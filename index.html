@@ -56,86 +56,86 @@ if ('serviceWorker' in navigator) {
   * { margin:0; padding:0; box-sizing:border-box; }
   .pw-screen { display:flex; align-items:center; justify-content:center; min-height:500px; border-radius:16px; background:#1a1a1a; }
   .pw-box { border:1px solid var(--theme-main); border-radius:16px; padding:32px 28px; text-align:center; width:300px; background:#222222; }
-  .pw-title { color:var(--theme-main); font-size:18px; font-weight:700; margin-bottom:4px; }
-  .pw-sub { color:#aaa; font-size:12px; margin-bottom:20px; }
-  .pin-disp { font-size:28px; letter-spacing:16px; color:#fff; margin:12px 0; min-height:40px; }
-  .pin-err { color:#e24b4a; font-size:12px; min-height:18px; margin-bottom:8px; }
+  .pw-title { color:var(--theme-main); font-size:21px; font-weight:700; margin-bottom:4px; }
+  .pw-sub { color:#aaa; font-size:14px; margin-bottom:20px; }
+  .pin-disp { font-size:32px; letter-spacing:16px; color:#fff; margin:12px 0; min-height:40px; }
+  .pin-err { color:#e24b4a; font-size:14px; min-height:18px; margin-bottom:8px; }
   .np { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-  .np-btn { all:unset; display:block; padding:14px; font-size:20px; font-weight:700; border-radius:10px; background-color:var(--theme-main) !important; color:var(--theme-text-on) !important; cursor:pointer; text-align:center; font-family:sans-serif; -webkit-text-fill-color:var(--theme-text-on) !important; }
+  .np-btn { all:unset; display:block; padding:14px; font-size:23px; font-weight:700; border-radius:10px; background-color:var(--theme-main) !important; color:var(--theme-text-on) !important; cursor:pointer; text-align:center; font-family:sans-serif; -webkit-text-fill-color:var(--theme-text-on) !important; }
   .np-btn:active { background-color:var(--theme-light) !important; }
   .app { display:none; position:relative; }
   .header { background:#111; padding:16px; }
   .header-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .header-left { display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
   .header-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
-  .admin-btn-header { padding:8px 12px; border-radius:8px; border:1.5px solid var(--theme-main); background:#222; color:var(--theme-main); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.15s; }
+  .admin-btn-header { padding:8px 12px; border-radius:8px; border:1.5px solid var(--theme-main); background:#222; color:var(--theme-main); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.15s; }
   .admin-btn-header:hover { background:var(--theme-main); color:var(--theme-text-on); }
   .admin-btn-header:active { transform:scale(0.96); }
   .admin-btn-header.logout { border-color:#e24b4a; color:#e24b4a; background:#2a1414; }
   .admin-btn-header.logout:hover { background:#e24b4a; color:#fff; }
   .team-logo { width:48px; height:48px; border-radius:8px; background:var(--theme-main); display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; padding:3px; box-sizing:border-box; }
   .team-logo img { width:100%; height:100%; object-fit:contain; display:block; }
-  .team-name { color:var(--theme-main); font-size:18px; font-weight:900; letter-spacing:1px; }
-  .team-sub { color:#888; font-size:10px; letter-spacing:2px; }
+  .team-name { color:var(--theme-main); font-size:21px; font-weight:900; letter-spacing:1px; }
+  .team-sub { color:#888; font-size:12px; letter-spacing:2px; }
   .header-stripe { height:3px; background:linear-gradient(90deg,var(--theme-main),var(--theme-light),var(--theme-main)); }
   .stats-row { display:flex; gap:8px; padding:12px; background:var(--color-background-tertiary); }
   .stat-card { flex:1; background:var(--color-background-secondary); border-radius:10px; padding:10px; text-align:center; border:0.5px solid var(--color-border-tertiary); }
-  .stat-num { font-size:20px; font-weight:700; color:var(--theme-main); }
-  .stat-label { font-size:10px; color:var(--color-text-secondary); margin-top:2px; }
+  .stat-num { font-size:23px; font-weight:700; color:var(--theme-main); }
+  .stat-label { font-size:12px; color:var(--color-text-secondary); margin-top:2px; }
 
   /* 選手統計パネル（選手管理タブ内） */
   .player-stats { background:#111; margin:0; padding:14px 12px; border-bottom:2px solid var(--theme-main); }
   .ps-main { display:flex; align-items:center; background:#1a1a1a; border-radius:12px; padding:14px 10px; margin-bottom:10px; border:1px solid #333; }
   .ps-main-item { flex:1; text-align:center; }
   .ps-main-divider { width:1px; height:38px; background:#333; }
-  .ps-main-label { font-size:10px; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-weight:700; }
-  .ps-main-value { font-size:26px; font-weight:900; color:var(--theme-main); line-height:1; }
-  .ps-unit { font-size:13px; color:#888; margin-left:3px; font-weight:700; }
+  .ps-main-label { font-size:12px; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-weight:700; }
+  .ps-main-value { font-size:30px; font-weight:900; color:var(--theme-main); line-height:1; }
+  .ps-unit { font-size:15px; color:#888; margin-left:3px; font-weight:700; }
   .ps-grades { display:flex; gap:6px; }
   .ps-grade-item { flex:1; background:#1a1a1a; border-radius:8px; padding:8px 4px; text-align:center; border:1px solid #2a2a2a; display:flex; flex-direction:column; align-items:center; gap:2px; }
-  .ps-grade-num { font-size:18px; font-weight:900; color:#fff; line-height:1; }
-  .ps-grade-label { font-size:10px; color:var(--theme-main); font-weight:700; }
+  .ps-grade-num { font-size:21px; font-weight:900; color:#fff; line-height:1; }
+  .ps-grade-label { font-size:12px; color:var(--theme-main); font-weight:700; }
   .admin-bar { display:flex; justify-content:flex-start; align-items:center; padding:6px 16px; background:var(--color-background-secondary); border-bottom:0.5px solid var(--color-border-tertiary); }
-  .admin-status { font-size:11px; color:var(--color-text-secondary); font-weight:700; letter-spacing:0.5px; }
-  .admin-btn { font-size:11px; padding:5px 14px; border-radius:20px; border:0.5px solid var(--color-border-secondary); background:transparent; cursor:pointer; color:var(--color-text-primary); font-family:inherit; }
+  .admin-status { font-size:13px; color:var(--color-text-secondary); font-weight:700; letter-spacing:0.5px; }
+  .admin-btn { font-size:13px; padding:5px 14px; border-radius:20px; border:0.5px solid var(--color-border-secondary); background:transparent; cursor:pointer; color:var(--color-text-primary); font-family:inherit; }
   .admin-btn.logout { background:#fff0f0; color:#c00; border-color:#fcc; }
   .tabs { display:flex; background:#111; border-bottom:0.5px solid var(--color-border-tertiary); padding:6px 6px 0; gap:4px; }
-  .tab { flex:1; padding:12px 8px; text-align:center; font-size:13px; font-weight:700; cursor:pointer; color:#888; background:#1f1f1f; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none; transition:all 0.15s; }
+  .tab { flex:1; padding:12px 8px; text-align:center; font-size:15px; font-weight:700; cursor:pointer; color:#888; background:#1f1f1f; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none; transition:all 0.15s; }
   .tab:hover { color:#ccc; background:#2a2a2a; }
   .tab.active { color:var(--theme-text-on); background:var(--theme-main); border-color:var(--theme-light); box-shadow:0 -2px 8px rgba(0,0,0,0.3); }
   .toolbar { display:flex; gap:8px; padding:10px 12px; background:var(--color-background-primary); border-bottom:0.5px solid var(--color-border-tertiary); min-height:48px; align-items:center; flex-wrap:wrap; }
-  .tb-gold { padding:7px 16px; border-radius:20px; border:none; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--theme-main); color:var(--theme-text-on); }
-  .tb-red { padding:7px 16px; border-radius:20px; border:none; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; background:#fff0f0; color:#c00; border:0.5px solid #fcc; }
+  .tb-gold { padding:7px 16px; border-radius:20px; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--theme-main); color:var(--theme-text-on); }
+  .tb-red { padding:7px 16px; border-radius:20px; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:#fff0f0; color:#c00; border:0.5px solid #fcc; }
   .grade-bar { display:flex; gap:8px; padding:8px 12px; background:var(--color-background-primary); border-bottom:0.5px solid var(--color-border-tertiary); align-items:center; }
   .grade-btns { display:flex; gap:6px; flex:1; overflow-x:auto; }
-  .grade-btn { padding:5px 14px; border-radius:20px; border:0.5px solid var(--color-border-secondary); background:transparent; color:var(--color-text-secondary); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .grade-btn { padding:5px 14px; border-radius:20px; border:0.5px solid var(--color-border-secondary); background:transparent; color:var(--color-text-secondary); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
   .grade-btn.active { background:var(--theme-main); color:var(--theme-text-on); border-color:var(--theme-main); }
 
   /* ボール番号検索カード */
   .ball-search-card { margin:10px 12px; padding:10px 12px; background:#fff8e1; border:1.5px solid var(--theme-main); border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
-  .ball-search-label { font-size:12px; font-weight:700; color:var(--theme-dark); margin-bottom:6px; letter-spacing:0.5px; }
+  .ball-search-label { font-size:14px; font-weight:700; color:var(--theme-dark); margin-bottom:6px; letter-spacing:0.5px; }
   .search-box { position:relative; display:flex; align-items:center; gap:8px; }
-  .search-box input { flex:1; min-width:0; padding:9px 14px; border:1px solid var(--theme-main); border-radius:8px; background:#fff; color:#111; font-size:15px; font-weight:700; font-family:inherit; box-sizing:border-box; }
+  .search-box input { flex:1; min-width:0; padding:9px 14px; border:1px solid var(--theme-main); border-radius:8px; background:#fff; color:#111; font-size:17px; font-weight:700; font-family:inherit; box-sizing:border-box; }
   .search-box input:focus { outline:none; border-color:var(--theme-dark); box-shadow:0 0 0 2px rgba(201,168,76,0.2); }
-  .search-go { flex-shrink:0; width:42px; height:38px; border-radius:8px; border:none; background:var(--theme-main); color:var(--theme-text-on); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
+  .search-go { flex-shrink:0; width:42px; height:38px; border-radius:8px; border:none; background:var(--theme-main); color:var(--theme-text-on); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
   .search-go:hover { background:var(--theme-dark); }
   .search-go:active { transform:scale(0.95); }
-  .search-clear { flex-shrink:0; width:38px; height:38px; border-radius:8px; border:none; background:#888; color:#fff; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
+  .search-clear { flex-shrink:0; width:38px; height:38px; border-radius:8px; border:none; background:#888; color:#fff; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; }
   .search-clear:hover { background:#555; }
 
   /* 並べ替えプルダウン（grade-bar右端） */
-  .sort-select { padding:6px 8px; border:0.5px solid var(--color-border-secondary); border-radius:8px; background:var(--color-background-secondary); color:var(--color-text-primary); font-size:11px; font-weight:700; font-family:inherit; cursor:pointer; flex-shrink:0; max-width:130px; }
+  .sort-select { padding:6px 8px; border:0.5px solid var(--color-border-secondary); border-radius:8px; background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; flex-shrink:0; max-width:130px; }
   .sort-select:focus { outline:none; border-color:var(--theme-main); }
 
   /* 検索ヒット時のハイライト表示 */
-  .search-hit-banner { padding:8px 12px; background:#fff3cd; border-bottom:1px solid var(--theme-main); font-size:12px; color:#333; font-weight:700; }
+  .search-hit-banner { padding:8px 12px; background:#fff3cd; border-bottom:1px solid var(--theme-main); font-size:14px; color:#333; font-weight:700; }
   .search-hit-banner.empty { background:#fee; border-bottom-color:#c00; color:#c00; }
 
   /* 確認バナー */
   .confirm-banner { margin:12px; border-radius:12px; background:#fff3cd; border:1px solid var(--theme-main); padding:14px 16px; }
-  .confirm-banner p { font-size:13px; font-weight:700; color:#333; margin-bottom:10px; }
+  .confirm-banner p { font-size:15px; font-weight:700; color:#333; margin-bottom:10px; }
   .confirm-btns { display:flex; gap:8px; }
-  .confirm-btns button { flex:1; padding:10px; border-radius:10px; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .confirm-btns button { flex:1; padding:10px; border-radius:10px; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
   .confirm-exec { background:#c00; color:#fff; }
   .confirm-cancel { background:#eee; color:#333; }
 
@@ -144,24 +144,24 @@ if ('serviceWorker' in navigator) {
   .card:hover { border-color:var(--theme-main); }
   .card-accent { position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#333,var(--theme-main)); }
   .card-badges { display:flex; gap:5px; align-items:center; margin-bottom:8px; flex-wrap:wrap; justify-content:center; width:100%; }
-  .grade-badge { background:#333; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; }
-  .num-badge { background:#111; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; border:1px solid var(--theme-main); }
-  .pos-badge { background:var(--theme-main); color:var(--theme-text-on); font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; }
-  .bibs-badge { background:#2a2a2a; color:#fff; font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; border:0.5px solid var(--theme-main); }
-  .ball-badge { background:#fff; color:#333; font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; border:0.5px solid var(--color-border-tertiary); }
-  .card-photo { width:100%; aspect-ratio:3/4; border-radius:10px; background:var(--color-background-secondary); border:1px solid var(--color-border-tertiary); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:8px; font-size:11px; color:var(--color-text-secondary); }
+  .grade-badge { background:#333; color:#fff; font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; }
+  .num-badge { background:#111; color:#fff; font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; border:1px solid var(--theme-main); }
+  .pos-badge { background:var(--theme-main); color:var(--theme-text-on); font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; }
+  .bibs-badge { background:#2a2a2a; color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:5px; border:0.5px solid var(--theme-main); }
+  .ball-badge { background:#fff; color:#333; font-size:10px; font-weight:700; padding:2px 6px; border-radius:5px; border:0.5px solid var(--color-border-tertiary); }
+  .card-photo { width:100%; aspect-ratio:3/4; border-radius:10px; background:var(--color-background-secondary); border:1px solid var(--color-border-tertiary); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:8px; font-size:13px; color:var(--color-text-secondary); }
   .card-photo img { width:100%; height:100%; object-fit:cover; }
-  .player-name { font-size:13px; font-weight:700; color:var(--color-text-primary); text-align:center; }
-  .player-roman { font-size:10px; color:var(--color-text-secondary); text-align:center; margin-bottom:3px; }
-  .player-info { font-size:11px; color:var(--color-text-secondary); text-align:center; }
+  .player-name { font-size:15px; font-weight:700; color:var(--color-text-primary); text-align:center; }
+  .player-roman { font-size:12px; color:var(--color-text-secondary); text-align:center; margin-bottom:3px; }
+  .player-info { font-size:13px; color:var(--color-text-secondary); text-align:center; }
 
   .cal-wrap { padding:14px; background:var(--color-background-tertiary); }
   .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-  .cal-title { font-size:16px; font-weight:700; color:var(--color-text-primary); }
-  .cal-nav { background:var(--theme-main); color:var(--theme-text-on); border:none; border-radius:8px; padding:6px 14px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .cal-title { font-size:18px; font-weight:700; color:var(--color-text-primary); }
+  .cal-nav { background:var(--theme-main); color:var(--theme-text-on); border:none; border-radius:8px; padding:6px 14px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
   .cal-grid { background:var(--color-background-primary); border-radius:14px; border:0.5px solid var(--color-border-tertiary); overflow:hidden; }
   .cal-dow { display:grid; grid-template-columns:repeat(7,1fr); }
-  .cal-dow-cell { text-align:center; padding:8px 4px; font-size:11px; font-weight:700; color:var(--color-text-secondary); }
+  .cal-dow-cell { text-align:center; padding:8px 4px; font-size:13px; font-weight:700; color:var(--color-text-secondary); }
   .cal-dow-cell:first-child { color:#e24b4a; }
   .cal-dow-cell:last-child { color:#4a8ee2; }
   .cal-days { display:grid; grid-template-columns:repeat(7,1fr); border-top:0.5px solid var(--color-border-tertiary); }
@@ -170,19 +170,19 @@ if ('serviceWorker' in navigator) {
   .cal-day.empty { background:var(--color-background-secondary); cursor:default; }
   .cal-day.today .cal-day-num { background:var(--theme-main); color:var(--theme-text-on); border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:700; }
   .cal-day:hover:not(.empty) { background:var(--color-background-secondary); }
-  .cal-day-num { font-size:12px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+  .cal-day-num { font-size:14px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
   .cal-day:nth-child(7n+1) .cal-day-num { color:#e24b4a; }
   .cal-day:nth-child(7n) .cal-day-num { color:#4a8ee2; }
   .cal-day.holiday .cal-day-num { color:#e24b4a !important; }
-  .cal-day-holiday-name { font-size:8px; color:#e24b4a; font-weight:700; margin-bottom:2px; line-height:1.1; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; }
-  .cal-event { font-size:9px; font-weight:700; padding:1px 4px; border-radius:4px; margin-bottom:1px; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.2; }
+  .cal-day-holiday-name { font-size:9px; color:#e24b4a; font-weight:700; margin-bottom:2px; line-height:1.1; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; }
+  .cal-event { font-size:10px; font-weight:700; padding:1px 4px; border-radius:4px; margin-bottom:1px; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.2; }
   .ev-practice { background:#22c55e; color:#fff; }
   .ev-game { background:#3b82f6; color:#fff; }
   .ev-tournament { background:#dc2626; color:#fff; }
   .ev-other { background:#6b7280; color:#fff; }
   .schedule-list { margin-top:14px; padding:14px 12px; background:#fffaeb; border-radius:14px; border:1.5px solid var(--theme-main); box-shadow:0 1px 3px rgba(0,0,0,0.04); }
   .schedule-list:empty, .schedule-list > div:only-child { /* 空のときはbox-shadowを薄く保つだけ */ }
-  .schedule-list-title { font-size:13px; font-weight:700; color:var(--theme-dark); margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed var(--theme-light); display:flex; align-items:center; gap:6px; }
+  .schedule-list-title { font-size:15px; font-weight:700; color:var(--theme-dark); margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed var(--theme-light); display:flex; align-items:center; gap:6px; }
   .schedule-item { background:#ffffff; border-radius:10px; border:1px solid var(--theme-light); padding:12px 14px; margin-bottom:8px; display:flex; gap:12px; align-items:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
   .schedule-item:last-child { margin-bottom:0; }
   /* 地図リンク（住所/施設名タップでGoogle Maps起動） */
@@ -190,36 +190,36 @@ if ('serviceWorker' in navigator) {
   .map-link:hover { color:#0d47a1; }
   .map-link:active { color:#003c8f; }
   .schedule-date-box { text-align:center; min-width:40px; }
-  .schedule-month { font-size:10px; color:var(--color-text-secondary); }
-  .schedule-day { font-size:22px; font-weight:700; color:var(--theme-main); line-height:1; }
-  .schedule-weekday { font-size:10px; color:var(--color-text-secondary); }
+  .schedule-month { font-size:12px; color:var(--color-text-secondary); }
+  .schedule-day { font-size:25px; font-weight:700; color:var(--theme-main); line-height:1; }
+  .schedule-weekday { font-size:12px; color:var(--color-text-secondary); }
   .schedule-info { flex:1; }
-  .schedule-type { font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-block; margin-bottom:4px; }
-  .schedule-title { font-size:14px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; }
-  .schedule-detail { font-size:11px; color:var(--color-text-secondary); }
-  .schedule-edit-btn { background:transparent; border:0.5px solid var(--color-border-secondary); border-radius:8px; padding:4px 10px; font-size:11px; cursor:pointer; color:var(--color-text-secondary); font-family:inherit; }
+  .schedule-type { font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-block; margin-bottom:4px; }
+  .schedule-title { font-size:16px; font-weight:700; color:var(--color-text-primary); margin-bottom:2px; }
+  .schedule-detail { font-size:13px; color:var(--color-text-secondary); }
+  .schedule-edit-btn { background:transparent; border:0.5px solid var(--color-border-secondary); border-radius:8px; padding:4px 10px; font-size:13px; cursor:pointer; color:var(--color-text-secondary); font-family:inherit; }
   /* 月次固定メッセージカード */
   .monthly-msg-card { background:#fffaeb; border:1.5px solid var(--theme-main); border-radius:12px; padding:12px 14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
   .monthly-msg-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; }
-  .monthly-msg-title { font-size:13px; font-weight:700; color:var(--theme-dark); flex:1; }
-  .monthly-msg-edit-btn { background:var(--theme-main); color:var(--theme-text-on); border:none; border-radius:8px; padding:5px 12px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
+  .monthly-msg-title { font-size:15px; font-weight:700; color:var(--theme-dark); flex:1; }
+  .monthly-msg-edit-btn { background:var(--theme-main); color:var(--theme-text-on); border:none; border-radius:8px; padding:5px 12px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; flex-shrink:0; }
   .monthly-msg-edit-btn:hover { background:var(--theme-dark); }
-  .monthly-msg-body { font-size:12px; color:var(--color-text-primary); white-space:pre-wrap; line-height:1.6; word-break:break-word; }
+  .monthly-msg-body { font-size:14px; color:var(--color-text-primary); white-space:pre-wrap; line-height:1.6; word-break:break-word; }
   .monthly-msg-body.empty { color:var(--color-text-secondary); font-style:italic; }
   /* カレンダー曜日ヘッダーの設定情報（固定会場・時間・当番ラベル） */
-  .cal-dow-cell-set { padding:6px 4px; font-size:9px; line-height:1.3; word-break:break-word; }
-  .cal-dow-place { font-size:9px; font-weight:700; color:var(--theme-dark); }
-  .cal-dow-time { font-size:8px; color:var(--color-text-secondary); }
-  .cal-dow-duty-label { font-size:8px; color:#c97a2b; font-weight:700; margin-top:2px; }
-  .cal-dow-edit-btn { background:transparent; border:none; color:var(--theme-dark); font-size:10px; cursor:pointer; padding:2px 4px; }
+  .cal-dow-cell-set { padding:6px 4px; font-size:10px; line-height:1.3; word-break:break-word; }
+  .cal-dow-place { font-size:10px; font-weight:700; color:var(--theme-dark); }
+  .cal-dow-time { font-size:9px; color:var(--color-text-secondary); }
+  .cal-dow-duty-label { font-size:9px; color:#c97a2b; font-weight:700; margin-top:2px; }
+  .cal-dow-edit-btn { background:transparent; border:none; color:var(--theme-dark); font-size:12px; cursor:pointer; padding:2px 4px; }
   /* カレンダー内当番表示 */
-  .cal-day-duty { font-size:8px; font-weight:700; color:#c97a2b; line-height:1.2; margin-bottom:1px; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .cal-day-duty { font-size:9px; font-weight:700; color:#c97a2b; line-height:1.2; margin-bottom:1px; word-break:break-all; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
   /* 曜日設定モーダル */
   .dow-set-row { display:grid; grid-template-columns:50px 1fr; gap:8px; align-items:center; margin-bottom:8px; }
-  .dow-set-label { font-size:13px; font-weight:700; color:var(--color-text-primary); }
+  .dow-set-label { font-size:15px; font-weight:700; color:var(--color-text-primary); }
   /* 日程モーダル内の当番選択 */
   .duty-section { background:#fff8e1; border:1px dashed var(--theme-main); border-radius:8px; padding:10px; margin-top:8px; }
-  .duty-section-title { font-size:12px; font-weight:700; color:var(--theme-dark); margin-bottom:6px; }
+  .duty-section-title { font-size:14px; font-weight:700; color:var(--theme-dark); margin-bottom:6px; }
   .duty-row { margin-bottom:6px; }
   .duty-row:last-child { margin-bottom:0; }
   .overlay { display:none; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; padding:20px; }
@@ -228,9 +228,9 @@ if ('serviceWorker' in navigator) {
   .admin-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:16px; }
   .admin-overlay.open { display:flex; }
   .admin-pw-box { background:#222; border:1px solid var(--theme-main); border-radius:16px; padding:28px; text-align:center; width:280px; max-width:100%; }
-  .admin-pw-title { color:var(--theme-main); font-size:15px; font-weight:700; margin-bottom:16px; }
-  .admin-pin-disp { font-size:24px; letter-spacing:14px; color:#fff; margin:8px 0 4px; min-height:36px; }
-  .admin-pin-err { color:#e24b4a; font-size:12px; min-height:18px; margin-bottom:6px; }
+  .admin-pw-title { color:var(--theme-main); font-size:17px; font-weight:700; margin-bottom:16px; }
+  .admin-pin-disp { font-size:28px; letter-spacing:14px; color:#fff; margin:8px 0 4px; min-height:36px; }
+  .admin-pin-err { color:#e24b4a; font-size:14px; min-height:18px; margin-bottom:6px; }
   /* モーダル：画面中央フロート表示（オーバーレイ方式） */
   .modal-bg { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
   .modal-bg.open { display:flex; }
@@ -240,12 +240,12 @@ if ('serviceWorker' in navigator) {
   .pop-overlay.open { display:flex; }
   .pop-overlay .modal { margin:auto; max-width:420px; width:100%; position:relative; z-index:10000; background:#ffffff; box-shadow:0 8px 32px rgba(0,0,0,0.3); }
   .modal { background:var(--color-background-primary); border-radius:14px; padding:20px; border:1px solid var(--theme-main); margin:12px; box-sizing:border-box; }
-  .modal h3 { font-size:16px; font-weight:700; margin-bottom:4px; color:var(--color-text-primary); }
-  .modal label { font-size:12px; color:var(--color-text-secondary); display:block; margin-bottom:4px; margin-top:10px; }
-  .modal input, .modal select, .modal textarea { width:100%; padding:9px 12px; border:0.5px solid var(--color-border-secondary); border-radius:8px; background:var(--color-background-secondary); color:var(--color-text-primary); font-size:13px; font-family:inherit; box-sizing:border-box; }
+  .modal h3 { font-size:18px; font-weight:700; margin-bottom:4px; color:var(--color-text-primary); }
+  .modal label { font-size:14px; color:var(--color-text-secondary); display:block; margin-bottom:4px; margin-top:10px; }
+  .modal input, .modal select, .modal textarea { width:100%; padding:9px 12px; border:0.5px solid var(--color-border-secondary); border-radius:8px; background:var(--color-background-secondary); color:var(--color-text-primary); font-size:15px; font-family:inherit; box-sizing:border-box; }
   .modal textarea { resize:vertical; min-height:70px; }
   .modal-btns { display:flex; gap:8px; margin-top:16px; }
-  .modal-btns button { flex:1; padding:11px 10px; border-radius:10px; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .modal-btns button { flex:1; padding:11px 10px; border-radius:10px; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:5px; }
   .btn-cancel { background:#444; color:#fff; border:1px solid #666; }
   .btn-cancel:active { background:#555; }
   .btn-submit { background:var(--theme-main); color:var(--theme-text-on); }
@@ -273,58 +273,58 @@ if ('serviceWorker' in navigator) {
     .stats-row { flex-wrap:wrap; gap:6px; padding:10px; }
     .stat-card { flex:1 1 calc(33.33% - 4px); min-width:0; padding:8px 4px; }
     .stat-card:nth-child(1), .stat-card:nth-child(2) { flex:1 1 calc(50% - 3px); }
-    .stat-num { font-size:18px; }
-    .stat-label { font-size:9px; }
+    .stat-num { font-size:21px; }
+    .stat-label { font-size:10px; }
 
     /* 選手カード：2列確実に入るサイズ */
     .grid { grid-template-columns:repeat(2, 1fr); gap:10px; padding:10px; }
     .card { padding:8px; }
     .card-badges { gap:3px; }
-    .grade-badge, .num-badge, .pos-badge { font-size:9px; padding:2px 6px; }
-    .player-name { font-size:12px; }
-    .player-roman { font-size:9px; }
-    .player-info { font-size:10px; }
+    .grade-badge, .num-badge, .pos-badge { font-size:10px; padding:2px 6px; }
+    .player-name { font-size:14px; }
+    .player-roman { font-size:10px; }
+    .player-info { font-size:12px; }
 
     /* ヘッダー：チーム名を少し詰める */
     .header { padding:12px; }
-    .team-name { font-size:16px; letter-spacing:0.5px; }
-    .team-sub { font-size:9px; letter-spacing:1px; }
+    .team-name { font-size:18px; letter-spacing:0.5px; }
+    .team-sub { font-size:10px; letter-spacing:1px; }
     .header-left { gap:8px; }
-    .admin-btn-header { padding:6px 8px; font-size:10px; border-radius:6px; }
+    .admin-btn-header { padding:6px 8px; font-size:12px; border-radius:6px; }
 
     /* タブ：パディング縮小・アイコン込みで見やすく */
     .tabs { padding:5px 5px 0; gap:3px; }
-    .tab { padding:10px 4px; font-size:12px; border-radius:8px 8px 0 0; }
+    .tab { padding:10px 4px; font-size:14px; border-radius:8px 8px 0 0; }
 
     /* ツールバー：折り返し許容済みなのでgap調整のみ */
     .toolbar { gap:6px; padding:8px 10px; }
-    .tb-gold, .tb-red { padding:6px 12px; font-size:11px; }
+    .tb-gold, .tb-red { padding:6px 12px; font-size:13px; }
 
     /* カレンダー：日付セル小さめ */
     .cal-wrap { padding:10px; }
     .cal-day { min-height:44px; padding:2px; }
-    .cal-day-num { font-size:11px; width:18px; height:18px; }
-    .cal-event { font-size:8px; padding:1px 3px; }
-    .cal-dow-cell { padding:6px 2px; font-size:10px; }
-    .cal-title { font-size:14px; }
+    .cal-day-num { font-size:13px; width:18px; height:18px; }
+    .cal-event { font-size:9px; padding:1px 3px; }
+    .cal-dow-cell { padding:6px 2px; font-size:12px; }
+    .cal-title { font-size:16px; }
 
     /* モーダル：左右マージン縮小 */
     .modal { padding:16px; margin:8px; }
-    .modal h3 { font-size:15px; }
+    .modal h3 { font-size:17px; }
 
     /* 管理者PWボックス */
     .admin-pw-box { width:100%; max-width:280px; padding:20px; }
 
     /* 日程リスト */
     .schedule-item { padding:10px 12px; gap:10px; }
-    .schedule-day { font-size:20px; }
+    .schedule-day { font-size:23px; }
   }
 
   /* 極小画面（〜360px、古いiPhone SE等） */
   @media (max-width:360px) {
-    .stat-num { font-size:16px; }
+    .stat-num { font-size:18px; }
     .grid { gap:8px; padding:8px; }
-    .pin-disp { font-size:24px; letter-spacing:12px; }
+    .pin-disp { font-size:28px; letter-spacing:12px; }
   }
 </style>
 
@@ -379,7 +379,7 @@ if ('serviceWorker' in navigator) {
         <button class="np-btn" onclick="inp('7',1)">7</button><button class="np-btn" onclick="inp('8',1)">8</button><button class="np-btn" onclick="inp('9',1)">9</button>
         <button class="np-btn" onclick="clr(1)">C</button><button class="np-btn" onclick="inp('0',1)">0</button><button class="np-btn" onclick="bsp(1)">⌫</button>
       </div>
-      <button onclick="closeAdminOverlay()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:1px solid #555;background:#333;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;">キャンセル</button>
+      <button onclick="closeAdminOverlay()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;border:1px solid #555;background:#333;color:#fff;font-size:15px;cursor:pointer;font-family:inherit;">キャンセル</button>
     </div>
   </div>
   <div class="tabs">
@@ -415,7 +415,7 @@ if ('serviceWorker' in navigator) {
     <div class="toolbar" id="playerToolbar">
       <button class="tb-gold" id="addBtn" onclick="openAddInDetail()" style="display:none;">＋ 選手追加</button>
       <button class="tb-red" id="promotionBtn" onclick="showPromotion()" style="display:none;">🎓 新年度一括進級</button>
-      <button class="tb-gold" id="playerExcelBtn" onclick="exportPlayerExcel()" style="display:none;font-size:11px;">📊 選手Excel出力</button>
+      <button class="tb-gold" id="playerExcelBtn" onclick="exportPlayerExcel()" style="display:none;font-size:13px;">📊 選手Excel出力</button>
     </div>
     <!-- 旧選手追加/編集フォーム（addModal）は詳細モーダル方式に統合されたため削除 -->
 
@@ -501,7 +501,7 @@ if ('serviceWorker' in navigator) {
         <label>場所</label><input type="text" id="sPlace" placeholder="例：上市町体育館">
         <label>目的地（地図検索用）</label>
         <input type="text" id="sDestination" placeholder="住所 or 施設名（例：上市町体育館 / 富山県中新川郡上市町〇〇）">
-        <div style="font-size:10px;color:var(--color-text-secondary);margin-top:-4px;margin-bottom:8px;">※ 入力するとカレンダーで📍リンクからGoogleマップが開きます</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:-4px;margin-bottom:8px;">※ 入力するとカレンダーで📍リンクからGoogleマップが開きます</div>
         <!-- 当番欄（曜日設定がある場合のみ表示） -->
         <div id="sDutySection" class="duty-section" style="display:none;">
           <div class="duty-section-title" id="sDutySectionTitle">当番</div>
@@ -522,7 +522,7 @@ if ('serviceWorker' in navigator) {
         <h3>📊 日程をExcel出力</h3>
         <label>開始日</label><input type="date" id="excelFrom">
         <label>終了日</label><input type="date" id="excelTo">
-        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;">※ 空欄の場合は全期間を出力します</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-top:8px;">※ 空欄の場合は全期間を出力します</div>
         <div class="modal-btns">
           <button class="btn-cancel" onclick="closeExcelModal()">キャンセル</button>
           <button class="btn-submit" onclick="exportExcel()">出力する</button>
@@ -531,7 +531,7 @@ if ('serviceWorker' in navigator) {
     </div>
     <div class="cal-wrap">
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
-        <button class="tb-gold" id="excelBtn" onclick="openExcelModal()" style="display:none;font-size:11px;">📊 Excel出力</button>
+        <button class="tb-gold" id="excelBtn" onclick="openExcelModal()" style="display:none;font-size:13px;">📊 Excel出力</button>
       </div>
       <!-- 月次固定メッセージエリア（チーム荷物当番など、その月の固定情報） -->
       <div class="monthly-msg-card" id="monthlyMsgCard">
@@ -547,7 +547,7 @@ if ('serviceWorker' in navigator) {
           <h3>📌 <span id="monthlyMsgModalMonth"></span>のお知らせを編集</h3>
           <label>内容</label>
           <textarea id="mMsgBody" placeholder="例：&#10;【荷物当番】&#10;救急箱：土井&#10;ロケランⅠ黄：西田&#10;ロケランⅡ黒：山本" style="min-height:140px;"></textarea>
-          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;">※ 改行はそのまま反映されます。空欄で保存すると未設定状態に戻ります。</div>
+          <div style="font-size:13px;color:var(--color-text-secondary);margin-top:6px;">※ 改行はそのまま反映されます。空欄で保存すると未設定状態に戻ります。</div>
           <div class="modal-btns">
             <button class="btn-cancel" onclick="closeMonthlyMsgModal()">キャンセル</button>
             <button class="btn-submit" onclick="saveMonthlyMsg()">保存</button>
@@ -570,7 +570,7 @@ if ('serviceWorker' in navigator) {
             <option value="key">🔑 鍵当番（1名）</option>
             <option value="goal">🥅 ゴール当番（3名）</option>
           </select>
-          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;">※ 設定するとカレンダーの曜日ヘッダーに会場・時間・当番ラベルが表示され、その曜日の日程入力時に当番欄が出ます。</div>
+          <div style="font-size:13px;color:var(--color-text-secondary);margin-top:6px;">※ 設定するとカレンダーの曜日ヘッダーに会場・時間・当番ラベルが表示され、その曜日の日程入力時に当番欄が出ます。</div>
           <div class="modal-btns">
             <button class="btn-cancel" onclick="closeDowSetModal()">キャンセル</button>
             <button class="btn-delete" onclick="clearDowSet()" style="background:#fff0f0;color:#c00;">クリア</button>
@@ -618,7 +618,7 @@ if ('serviceWorker' in navigator) {
       </div>
     </div>
     <div style="padding:14px;background:var(--color-background-tertiary);" id="infoList">
-      <div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:13px;">インフォメーションはありません</div>
+      <div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:15px;">インフォメーションはありません</div>
     </div>
   </div>
 
@@ -630,7 +630,7 @@ if ('serviceWorker' in navigator) {
       <input type="number" id="newViewPw" placeholder="4桁の数字" maxlength="4">
       <label>管理者パス（現在：<span id="curAdminPw">****</span>）</label>
       <input type="number" id="newAdminPw" placeholder="4桁の数字" maxlength="4">
-      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;">※ 空欄のものは変更しません</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-top:8px;">※ 空欄のものは変更しません</div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closePwChange()">キャンセル</button>
         <button class="btn-submit" onclick="savePwChange()">変更する</button>
@@ -642,7 +642,7 @@ if ('serviceWorker' in navigator) {
   <div class="modal-bg" id="confirmModal" onclick="if(event.target===this)closeConfirmModal();" style="z-index:10001;">
     <div class="modal" onclick="event.stopPropagation();" style="max-width:380px;">
       <h3 id="confirmTitle">確認</h3>
-      <div id="confirmBody" style="font-size:13px;color:var(--color-text-primary);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;"></div>
+      <div id="confirmBody" style="font-size:15px;color:var(--color-text-primary);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;"></div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeConfirmModal()" id="confirmCancelBtn">キャンセル</button>
         <button class="btn-submit" onclick="execConfirmModal()" id="confirmOkBtn">OK</button>
@@ -923,19 +923,19 @@ function openDetail(id){
   currentDetailId=id;
   const photoHtml=p.photo
     ? `<img src="${p.photo}" style="width:100%;max-height:280px;object-fit:cover;">`
-    : `<div style="height:200px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary);font-size:13px;">写真未登録</div>`;
+    : `<div style="height:200px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary);font-size:15px;">写真未登録</div>`;
   document.getElementById('detailContent').innerHTML=`
     <div style="background:#111;padding:16px;color:#fff;">
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-        <span style="background:var(--theme-main);color:var(--theme-text-on);font-size:12px;font-weight:900;padding:3px 10px;border-radius:6px;">${gradeLabel(p.grade)}</span>
-        ${p.number?`<span style="background:#fff;color:#111;font-size:12px;font-weight:900;padding:3px 10px;border-radius:6px;">#${p.number}</span>`:''}
+        <span style="background:var(--theme-main);color:var(--theme-text-on);font-size:14px;font-weight:900;padding:3px 10px;border-radius:6px;">${gradeLabel(p.grade)}</span>
+        ${p.number?`<span style="background:#fff;color:#111;font-size:14px;font-weight:900;padding:3px 10px;border-radius:6px;">#${p.number}</span>`:''}
       </div>
-      <div style="font-size:20px;font-weight:900;margin-bottom:2px;">${p.name}</div>
-      <div style="font-size:11px;color:#aaa;letter-spacing:1px;">${p.roman||''}</div>
+      <div style="font-size:23px;font-weight:900;margin-bottom:2px;">${p.name}</div>
+      <div style="font-size:13px;color:#aaa;letter-spacing:1px;">${p.roman||''}</div>
     </div>
     ${photoHtml}
     <div style="padding:16px;">
-      <table style="width:100%;font-size:13px;border-collapse:collapse;">
+      <table style="width:100%;font-size:15px;border-collapse:collapse;">
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);width:40%;border-bottom:0.5px solid var(--color-border-tertiary);">学年</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${gradeLabel(p.grade)}</td></tr>
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">背番号</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.number?'#'+p.number:'-'}</td></tr>
         <tr><td style="padding:8px 0;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">身長</td><td style="padding:8px 0;font-weight:700;border-bottom:0.5px solid var(--color-border-tertiary);">${p.height?p.height+' cm':'-'}</td></tr>
@@ -1125,50 +1125,50 @@ function renderEditForm(p){
   const title=isNew?'選手を追加':'選手を編集';
   document.getElementById('detailContent').innerHTML=`
     <div style="background:#111;padding:16px;color:#fff;">
-      <div style="font-size:18px;font-weight:900;">${title}</div>
+      <div style="font-size:21px;font-weight:900;">${title}</div>
     </div>
     <div style="padding:16px;">
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">名前（漢字）<span style="color:#c00;">*</span></label>
-      <input type="text" id="fName" placeholder="例：山田太郎" value="${escapeHtml(p?.name||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);color:var(--color-text-primary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin-bottom:4px;">名前（漢字）<span style="color:#c00;">*</span></label>
+      <input type="text" id="fName" placeholder="例：山田太郎" value="${escapeHtml(p?.name||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);color:var(--color-text-primary);font-size:15px;box-sizing:border-box;">
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">フリガナ（ローマ字）</label>
-      <input type="text" id="fRoman" placeholder="例：YAMADA TARO" value="${escapeHtml(p?.roman||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">フリガナ（ローマ字）</label>
+      <input type="text" id="fRoman" placeholder="例：YAMADA TARO" value="${escapeHtml(p?.roman||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">学年<span style="color:#c00;">*</span></label>
-      <select id="fGrade" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">学年<span style="color:#c00;">*</span></label>
+      <select id="fGrade" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
         ${[6,5,4,3,2,1].map(g=>`<option value="${g}" ${p&&p.grade===g?'selected':''}>${g}年生</option>`).join('')}
       </select>
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">背番号</label>
-      <input type="number" id="fNumber" placeholder="例：7" value="${p?.number||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">背番号</label>
+      <input type="number" id="fNumber" placeholder="例：7" value="${p?.number||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">身長 (cm)</label>
-      <input type="number" id="fHeight" placeholder="例：140" value="${p?.height||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">身長 (cm)</label>
+      <input type="number" id="fHeight" placeholder="例：140" value="${p?.height||''}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス番号</label>
-      <input type="text" id="fBibsNumber" inputmode="numeric" pattern="[0-9]*" placeholder="例：11、0、00" value="${escapeHtml(p?.bibsNumber||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス番号</label>
+      <input type="text" id="fBibsNumber" inputmode="numeric" pattern="[0-9]*" placeholder="例：11、0、00" value="${escapeHtml(p?.bibsNumber||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス所有<span style="color:#c00;">*</span></label>
-      <select id="fBibsOwn" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ビブス所有<span style="color:#c00;">*</span></label>
+      <select id="fBibsOwn" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
         <option value="personal" ${(!p||p.bibsOwn==='personal')?'selected':''}>個人購入</option>
         <option value="team" ${p&&p.bibsOwn==='team'?'selected':''}>チーム貸出</option>
       </select>
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ボール<span style="color:#c00;">*</span></label>
-      <select id="fBallType" onchange="toggleBallNumber()" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">ボール<span style="color:#c00;">*</span></label>
+      <select id="fBallType" onchange="toggleBallNumber()" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
         <option value="team" ${(!p||p.ballType==='team')?'selected':''}>チーム貸出</option>
         <option value="personal" ${p&&p.ballType==='personal'?'selected':''}>マイボール（個人所有）</option>
       </select>
 
       <div id="ballNumberBox" style="${p&&p.ballType==='personal'?'display:none;':''}">
-        <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">チーム貸出ボール番号</label>
-        <input type="text" id="fBallNumber" placeholder="例：7 または A-3" value="${escapeHtml(p?.ballNumber||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:13px;box-sizing:border-box;">
+        <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">チーム貸出ボール番号</label>
+        <input type="text" id="fBallNumber" placeholder="例：7 または A-3" value="${escapeHtml(p?.ballNumber||'')}" style="width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-secondary);font-size:15px;box-sizing:border-box;">
       </div>
 
-      <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">写真</label>
-      <input type="file" id="fPhoto" accept="image/*" style="width:100%;font-size:13px;">
-      <div style="font-size:10px;color:var(--color-text-secondary);margin-top:4px;">※ 写真は自動で縮小されます（長辺800px、約100KBに圧縮）</div>
-      ${p?.photo?`<div style="margin-top:8px;"><div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:4px;">現在の写真：</div><img src="${p.photo}" style="max-width:120px;max-height:120px;border-radius:8px;"></div>`:''}
+      <label style="font-size:14px;color:var(--color-text-secondary);display:block;margin:10px 0 4px;">写真</label>
+      <input type="file" id="fPhoto" accept="image/*" style="width:100%;font-size:15px;">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">※ 写真は自動で縮小されます（長辺800px、約100KBに圧縮）</div>
+      ${p?.photo?`<div style="margin-top:8px;"><div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">現在の写真：</div><img src="${p.photo}" style="max-width:120px;max-height:120px;border-radius:8px;"></div>`:''}
     </div>
   `;
 }
@@ -1554,20 +1554,20 @@ function openDayDetailModal(dateStr){
     if(s.dutyType && DUTY_INFO[s.dutyType] && Array.isArray(s.duty)){
       const names=s.duty.filter(n=>n);
       if(names.length){
-        dutyHtml=`<div style="margin-top:6px;color:#c97a2b;font-weight:700;font-size:12px;">${DUTY_INFO[s.dutyType].label}：${escapeHtml(names.join('・'))}</div>`;
+        dutyHtml=`<div style="margin-top:6px;color:#c97a2b;font-weight:700;font-size:14px;">${DUTY_INFO[s.dutyType].label}：${escapeHtml(names.join('・'))}</div>`;
       }
     }
     const destHtml=s.destination
-      ? `<div style="margin-top:4px;font-size:12px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`
+      ? `<div style="margin-top:4px;font-size:14px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`
       : '';
-    const memoHtml=s.memo?`<div style="margin-top:6px;font-size:12px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.5;">${escapeHtml(s.memo)}</div>`:'';
+    const memoHtml=s.memo?`<div style="margin-top:6px;font-size:14px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.5;">${escapeHtml(s.memo)}</div>`:'';
     return `<div style="background:#ffffff;border:1px solid var(--theme-light);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
         <span class="schedule-type ${TYPE_CLASS[s.type]}">${TYPE_LABEL[s.type]}</span>
-        ${timeStr?`<span style="font-size:12px;font-weight:700;color:var(--theme-dark);">${timeStr}</span>`:''}
+        ${timeStr?`<span style="font-size:14px;font-weight:700;color:var(--theme-dark);">${timeStr}</span>`:''}
       </div>
-      <div style="font-size:14px;font-weight:700;color:var(--color-text-primary);margin-bottom:2px;">${escapeHtml(s.title)}</div>
-      ${s.place?`<div style="font-size:12px;color:var(--color-text-secondary);">${escapeHtml(s.place)}</div>`:''}
+      <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:2px;">${escapeHtml(s.title)}</div>
+      ${s.place?`<div style="font-size:14px;color:var(--color-text-secondary);">${escapeHtml(s.place)}</div>`:''}
       ${destHtml}
       ${dutyHtml}
       ${memoHtml}
@@ -1590,7 +1590,7 @@ function renderDowRow(){
     const hasSet=set.place || set.start || set.duty;
     const adminClick=isAdmin?`onclick="openDowSetModal(${i})"`:'';
     const adminCursor=isAdmin?'cursor:pointer;':'';
-    let inner=`<div style="font-weight:700;font-size:11px;">${DOW_NAMES[i]}</div>`;
+    let inner=`<div style="font-weight:700;font-size:13px;">${DOW_NAMES[i]}</div>`;
     if(hasSet){
       if(set.place) inner+=`<div class="cal-dow-place">${escapeHtml(set.place)}</div>`;
       if(set.start || set.end){
@@ -1601,7 +1601,7 @@ function renderDowRow(){
         inner+=`<div class="cal-dow-duty-label">${DUTY_INFO[set.duty].label}</div>`;
       }
     } else if(isAdmin){
-      inner+=`<div style="font-size:9px;color:var(--color-text-secondary);">タップで設定</div>`;
+      inner+=`<div style="font-size:10px;color:var(--color-text-secondary);">タップで設定</div>`;
     }
     html+=`<div class="cal-dow-cell cal-dow-cell-set" style="${adminCursor}" ${adminClick}>${inner}</div>`;
   }
@@ -1611,7 +1611,7 @@ function renderScheduleList(){
   const y=calYear,m=calMonth;
   const monthEvs=schedules.filter(s=>{ const [sy,sm]=s.date.split('-').map(Number); return sy===y&&sm===m+1; }).sort((a,b)=>a.date.localeCompare(b.date));
   const titleHtml=`<div class="schedule-list-title">📋 ${y}年${m+1}月の予定（${monthEvs.length}件）</div>`;
-  if(monthEvs.length===0){ document.getElementById('scheduleList').innerHTML=titleHtml+`<div style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:13px;">この月の予定はありません</div>`; return; }
+  if(monthEvs.length===0){ document.getElementById('scheduleList').innerHTML=titleHtml+`<div style="text-align:center;padding:20px;color:var(--color-text-secondary);font-size:15px;">この月の予定はありません</div>`; return; }
   document.getElementById('scheduleList').innerHTML=titleHtml+monthEvs.map(s=>{
     const d=new Date(s.date+'T00:00:00');
     const editBtn=isAdmin?`<button class="schedule-edit-btn" onclick="editSchedule('${s.id}')">編集</button>`:'';
@@ -1714,7 +1714,7 @@ function renderDutySection(dateStr, existing){
     // 既存値が候補に無い場合（削除された選手）は手入力テキストで保持
     const isInList=candidates.some(c=>c.value===sel);
     const customRow=(sel && !isInList)
-      ? `<div style="font-size:10px;color:#c97a2b;margin-top:2px;">※ 旧データ：${escapeHtml(sel)}（保存すると消えます）</div>`
+      ? `<div style="font-size:12px;color:#c97a2b;margin-top:2px;">※ 旧データ：${escapeHtml(sel)}（保存すると消えます）</div>`
       : '';
     rows.push(`<div class="duty-row">
       <select class="duty-select" data-idx="${i}">${opts}</select>
@@ -1972,7 +1972,7 @@ function renderInfos(){
   const listEl=document.getElementById('infoList');
   document.getElementById('addInfoBtn').style.display=isAdmin?'block':'none';
   if(!infos.length){
-    listEl.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:13px;">インフォメーションはありません</div>';
+    listEl.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--color-text-secondary);font-size:15px;">インフォメーションはありません</div>';
   } else {
     const sorted=[...infos].sort((a,b)=>b.createdAt-a.createdAt);
     listEl.innerHTML=sorted.map(info=>{
@@ -1984,11 +1984,11 @@ function renderInfos(){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
           <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-              <span style="background:${color};color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.5px;">${info.from}</span>
-              <span style="font-size:11px;color:var(--color-text-secondary);">${dateStr}</span>
+              <span style="background:${color};color:#fff;font-size:13px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.5px;">${info.from}</span>
+              <span style="font-size:13px;color:var(--color-text-secondary);">${dateStr}</span>
             </div>
-            <div style="font-size:14px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">${info.title}</div>
-            <div style="font-size:13px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.6;">${info.body}</div>
+            <div style="font-size:16px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">${info.title}</div>
+            <div style="font-size:15px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.6;">${info.body}</div>
           </div>
           ${editBtn}
         </div>
@@ -2008,8 +2008,8 @@ function renderTopInfoBanner(){
   banner.innerHTML=`
     <div style="padding:10px 12px 4px;background:var(--color-background-tertiary);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:11px;font-weight:700;color:var(--color-text-secondary);letter-spacing:1px;">📢 INFORMATION</span>
-        <span onclick="switchTab('info')" style="font-size:11px;color:var(--theme-main);cursor:pointer;font-weight:700;">すべて見る →</span>
+        <span style="font-size:13px;font-weight:700;color:var(--color-text-secondary);letter-spacing:1px;">📢 INFORMATION</span>
+        <span onclick="switchTab('info')" style="font-size:13px;color:var(--theme-main);cursor:pointer;font-weight:700;">すべて見る →</span>
       </div>
       ${items.map(info=>{
         const color=FROM_COLOR[info.from]||'#888';
@@ -2018,11 +2018,11 @@ function renderTopInfoBanner(){
         const bodyPreview=info.body.replace(/\n/g,' ');
         return `<div onclick="switchTab('info')" style="background:var(--color-background-primary);border-radius:10px;border-left:4px solid ${color};padding:10px 14px;margin-bottom:8px;cursor:pointer;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-            <span style="background:${color};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;">${info.from}</span>
-            <span style="font-size:11px;color:var(--color-text-secondary);">${dateStr}</span>
+            <span style="background:${color};color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;">${info.from}</span>
+            <span style="font-size:13px;color:var(--color-text-secondary);">${dateStr}</span>
           </div>
-          <div style="font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px;">${info.title}</div>
-          <div style="font-size:12px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bodyPreview}</div>
+          <div style="font-size:15px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px;">${info.title}</div>
+          <div style="font-size:14px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bodyPreview}</div>
         </div>`;
       }).join('')}
     </div>
