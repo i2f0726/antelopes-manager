@@ -1,13 +1,21 @@
 // ===================================================================
 // sw.js のバージョンを自動更新するスクリプト（ミニバス用）
 // npm run deploy 実行時に自動で走ります
+//
+// 対象:
+//   - ルートの sw.js（メインダッシュボード用）
+//   - scores/sw.js（スコアボード用）
+//   今後 PWA を増やしたら TARGETS 配列に追加するだけ
 // ===================================================================
 
 const fs = require('fs');
 const path = require('path');
 
-// 同じフォルダ内の sw.js を対象にする
-const SW_PATH = path.join(__dirname, 'sw.js');
+// 更新対象のsw.jsをここに列挙
+const TARGETS = [
+  path.join(__dirname, 'sw.js'),
+  path.join(__dirname, 'scores', 'sw.js'),
+];
 
 // 今の日時から バージョン文字列を作る（例: 2026-04-29-1430）
 function makeVersion() {
@@ -21,25 +29,42 @@ function makeVersion() {
 }
 
 const newVersion = makeVersion();
+let updatedCount = 0;
+let skippedCount = 0;
 
-if (!fs.existsSync(SW_PATH)) {
-  console.error('❌ sw.js が見つかりません: ' + SW_PATH);
+TARGETS.forEach((swPath) => {
+  const label = path.relative(__dirname, swPath);
+
+  if (!fs.existsSync(swPath)) {
+    console.log(`⏭️  スキップ（ファイルなし）: ${label}`);
+    skippedCount++;
+    return;
+  }
+
+  let content = fs.readFileSync(swPath, 'utf8');
+  const before = content;
+
+  // const CACHE_VERSION = '...' の部分を書き換え
+  content = content.replace(
+    /const\s+CACHE_VERSION\s*=\s*['"][^'"]*['"]\s*;/,
+    `const CACHE_VERSION = '${newVersion}';`
+  );
+
+  if (content === before) {
+    console.warn(`⚠️  CACHE_VERSION が見つかりません: ${label}`);
+    skippedCount++;
+    return;
+  }
+
+  fs.writeFileSync(swPath, content, 'utf8');
+  console.log(`✅ ${label} → ${newVersion}`);
+  updatedCount++;
+});
+
+console.log(`\n📦 ${updatedCount}件更新 / ${skippedCount}件スキップ`);
+
+// 1件も更新できなかった場合はエラー終了
+if (updatedCount === 0) {
+  console.error('❌ どのsw.jsも更新できませんでした');
   process.exit(1);
 }
-
-let content = fs.readFileSync(SW_PATH, 'utf8');
-const before = content;
-
-// const CACHE_VERSION = '...' の部分を書き換え
-content = content.replace(
-  /const\s+CACHE_VERSION\s*=\s*['"][^'"]*['"]\s*;/,
-  `const CACHE_VERSION = '${newVersion}';`
-);
-
-if (content === before) {
-  console.error('⚠️ sw.js に CACHE_VERSION が見つかりません');
-  process.exit(1);
-}
-
-fs.writeFileSync(SW_PATH, content, 'utf8');
-console.log(`✅ sw.js のバージョンを更新: ${newVersion}`);

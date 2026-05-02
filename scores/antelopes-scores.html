@@ -278,8 +278,127 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
 }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
+/* 削除確認モーダル */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display:none; align-items:center; justify-content:center;
+  z-index:10000;
+  padding:20px;
+  animation: fadeIn 0.2s ease-out;
+}
+.modal-overlay.show { display:flex; }
+.modal-box {
+  background:var(--card);
+  border:2px solid var(--gold);
+  border-radius:16px;
+  max-width:380px; width:100%;
+  padding:24px 20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.2);
+  animation: slideUp 0.25s ease-out;
+}
+.modal-icon {
+  text-align:center;
+  font-size:2.4rem;
+  margin-bottom:8px;
+}
+.modal-title {
+  text-align:center;
+  font-size:1.05rem;
+  font-weight:900;
+  color:var(--gold);
+  margin-bottom:14px;
+  letter-spacing:0.05em;
+}
+.modal-body {
+  background:var(--green2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  font-size:0.85rem;
+  color:var(--text);
+  line-height:1.6;
+}
+.modal-body .match-info {
+  font-weight:700;
+  color:var(--gold2);
+  margin-bottom:4px;
+}
+.modal-warning {
+  text-align:center;
+  font-size:0.78rem;
+  color:var(--muted);
+  margin-bottom:18px;
+}
+.modal-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.modal-btn {
+  padding:12px 16px;
+  border:none;
+  border-radius:8px;
+  font-size:0.88rem;
+  font-weight:900;
+  cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.modal-btn:active { transform: scale(0.97); }
+.modal-btn-cancel {
+  background:var(--green2);
+  color:var(--text);
+  border:1px solid var(--border);
+}
+.modal-btn-cancel:hover { background:#222; }
+.modal-btn-confirm {
+  background:linear-gradient(135deg, var(--red), #d44a3b);
+  color:#fff;
+  box-shadow:0 4px 12px rgba(192,57,43,0.4);
+}
+.modal-btn-confirm:hover { box-shadow:0 6px 16px rgba(192,57,43,0.6); }
+
+@keyframes fadeIn {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(20px) scale(0.96); }
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 .dot { display:inline-block; width:7px; height:7px; background:#e74c3c; border-radius:50%; animation:blink 1s infinite; }
+
+/* 更新通知バナー（タップでリロード） */
+.update-banner {
+  position:fixed; top:0; left:0; right:0;
+  background:linear-gradient(135deg, var(--gold), var(--gold2));
+  color:var(--forest);
+  padding:14px 20px;
+  font-size:0.85rem; font-weight:900;
+  text-align:center;
+  cursor:pointer;
+  z-index:10001;
+  box-shadow:0 4px 16px rgba(0,0,0,0.4);
+  transform:translateY(-100%);
+  transition:transform 0.3s ease-out;
+  display:flex; align-items:center; justify-content:center;
+  gap:8px;
+}
+.update-banner.show { transform:translateY(0); }
+.update-banner-icon {
+  display:inline-block;
+  animation: spin 2s linear infinite;
+}
+@keyframes spin {
+  from { transform:rotate(0deg); }
+  to { transform:rotate(360deg); }
+}
 
 /* 区切り線 */
 .divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:14px 0; }
@@ -389,6 +508,28 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- 更新通知バナー（新バージョン検知時に表示） -->
+<div class="update-banner" id="updateBanner">
+  <span class="update-banner-icon">🔄</span>
+  <span>新しいバージョンがあります — タップで更新</span>
+</div>
+
+<!-- 削除確認モーダル -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">試合を削除しますか？</div>
+    <div class="modal-body" id="deleteModalBody">
+      <!-- 試合情報がここに入る -->
+    </div>
+    <div class="modal-warning">この操作は取り消せません</div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" id="deleteModalCancel">キャンセル</button>
+      <button class="modal-btn modal-btn-confirm" id="deleteModalConfirm">削除する</button>
+    </div>
+  </div>
+</div>
 
 <script>
 window.addEventListener("load", function() {
@@ -627,13 +768,47 @@ function doEdit(btn) {
   switchTab('admin'); updatePreview(); window.scrollTo(0,0);
 }
 
+var pendingDeleteId = null;
+
 function doDelete(btn) {
   var id = btn.getAttribute('data-id');
-  if (!confirm('この試合を削除しますか？')) return;
+  var match = null;
+  for (var i = 0; i < matches.length; i++) {
+    if (String(matches[i].id) === id) { match = matches[i]; break; }
+  }
+  pendingDeleteId = id;
+
+  // モーダルに試合情報を表示
+  var bodyEl = document.getElementById('deleteModalBody');
+  if (match) {
+    var dateStr = match.date ? new Date(match.date).toLocaleDateString('ja-JP') : '日付不明';
+    var scoreStr = (match.ht != null && match.at != null) ? (match.ht + ' - ' + match.at) : '';
+    var liveTag = match.live ? ' <span style="color:#e74c3c;font-size:0.7rem;">● LIVE中</span>' : '';
+    bodyEl.innerHTML =
+      '<div class="match-info">vs ' + (match.opp || '?') + liveTag + '</div>' +
+      '<div>' + (match.name || '') + '</div>' +
+      '<div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">' + dateStr +
+      (scoreStr ? '　/　スコア ' + scoreStr : '') + '</div>';
+  } else {
+    bodyEl.textContent = '選択した試合';
+  }
+
+  document.getElementById('deleteModal').classList.add('show');
+}
+
+function confirmDelete() {
+  var id = pendingDeleteId;
+  closeDeleteModal();
+  if (!id) return;
   db.collection('matches').doc(id).delete().then(function() {
     if (liveId === id) { liveId = null; saveMeta(); }
     toast('🗑️ 削除しました');
-  });
+  }).catch(function(e) { toast('❌ エラー: ' + e.message); });
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('show');
+  pendingDeleteId = null;
 }
 
 function doExcel() {
@@ -750,7 +925,77 @@ window.doDelete = doDelete;
 window.doExcel = doExcel;
 window.updatePreview = updatePreview;
   window.validateQScores = validateQScores;
+
+// 削除確認モーダルのボタン設定
+document.getElementById('deleteModalConfirm').addEventListener('click', confirmDelete);
+document.getElementById('deleteModalCancel').addEventListener('click', closeDeleteModal);
+// オーバーレイクリックでキャンセル
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+// ESCキーでキャンセル
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('deleteModal').classList.contains('show')) {
+    closeDeleteModal();
+  }
+});
 }); // window.onload
+</script>
+
+<!-- ===== Service Worker 登録（自動更新検知） ===== -->
+<script>
+(function() {
+  if (!('serviceWorker' in navigator)) return;
+
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      console.log('[SW] Registered, scope:', reg.scope);
+
+      // 既に待機中のSWがあれば即通知
+      if (reg.waiting) {
+        showUpdateBanner(reg.waiting);
+      }
+
+      // 新しいSWが見つかったとき
+      reg.addEventListener('updatefound', function() {
+        var newSW = reg.installing;
+        if (!newSW) return;
+        newSW.addEventListener('statechange', function() {
+          // 新SWがインストール済み & 既存SWが動作中 = 更新あり
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBanner(newSW);
+          }
+        });
+      });
+
+      // 1時間ごとに更新チェック（PWAを開きっぱなしの場合）
+      setInterval(function() { reg.update(); }, 60 * 60 * 1000);
+    }).catch(function(err) {
+      console.warn('[SW] Registration failed:', err);
+    });
+
+    // 新SW有効化後、自動でリロード（1ページにつき1回だけ）
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  });
+
+  // 更新バナーを表示し、タップで新SWを有効化
+  function showUpdateBanner(waitingSW) {
+    var banner = document.getElementById('updateBanner');
+    if (!banner) return;
+    banner.classList.add('show');
+    banner.addEventListener('click', function() {
+      banner.textContent = '更新中...';
+      // 新SWに「待機解除して有効化して」と指示
+      waitingSW.postMessage({ type: 'SKIP_WAITING' });
+      // controllerchange イベントで自動リロードされる
+    }, { once: true });
+  }
+})();
 </script>
 </body>
 </html>
