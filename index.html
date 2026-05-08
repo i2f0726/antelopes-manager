@@ -906,6 +906,26 @@ function escapeHtml(str){
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+// URLを自動でハイパーリンクに変換（XSS対策のため必ずescapeHtmlしてから使う）
+// 使い方: linkify(escapeHtml(text)) ではなく linkify(text) でOK（内部でエスケープ済み）
+function linkify(str){
+  if(str===null||str===undefined) return '';
+  // まずHTMLエスケープしてから、URLパターンをaタグに置換
+  const escaped=escapeHtml(str);
+  // http(s):// で始まるURL、または www. で始まるドメインを検出
+  // 末尾の句読点（。、,.;:!?）はリンクに含めない
+  const urlPattern=/(https?:\/\/[^\s<　。、！？]+|www\.[^\s<　。、！？]+)/g;
+  return escaped.replace(urlPattern, function(url){
+    // 末尾の閉じ括弧などを除外（よくあるケース）
+    let trail='';
+    while(/[)\]）】.,;:!?]$/.test(url)){
+      trail=url.slice(-1)+trail;
+      url=url.slice(0,-1);
+    }
+    const href=url.startsWith('http')?url:'https://'+url;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--theme-main);text-decoration:underline;word-break:break-all;">${url}</a>${trail}`;
+  });
+}
 // Google Mapsで目的地を開く（住所でも施設名でもOK・APIキー不要）
 function openGoogleMaps(query){
   if(!query) return;
@@ -1531,7 +1551,7 @@ function renderMonthlyMessage(){
   const body=monthlyMessages[key]?monthlyMessages[key].body:'';
   const bodyEl=document.getElementById('monthlyMsgBody');
   if(body && body.trim()){
-    bodyEl.textContent=body;
+    bodyEl.innerHTML=linkify(body);
     bodyEl.classList.remove('empty');
   } else {
     bodyEl.textContent='（未設定）';
@@ -1560,7 +1580,7 @@ function openDayDetailModal(dateStr){
     const destHtml=s.destination
       ? `<div style="margin-top:4px;font-size:17px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`
       : '';
-    const memoHtml=s.memo?`<div style="margin-top:6px;font-size:17px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.5;">${escapeHtml(s.memo)}</div>`:'';
+    const memoHtml=s.memo?`<div style="margin-top:6px;font-size:17px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.5;">${linkify(s.memo)}</div>`:'';
     return `<div style="background:#ffffff;border:1px solid var(--theme-light);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
         <span class="schedule-type ${TYPE_CLASS[s.type]}">${TYPE_LABEL[s.type]}</span>
@@ -1636,7 +1656,7 @@ function renderScheduleList(){
         <div class="schedule-detail">${timeStr}${escapeHtml(s.place||'')}</div>
         ${s.destination?`<div class="schedule-detail" style="margin-top:4px;"><a href="javascript:void(0)" onclick="openGoogleMaps('${escapeHtml(s.destination).replace(/'/g,"\\'")}')" class="map-link">📍 ${escapeHtml(s.destination)}</a></div>`:''}
         ${dutyHtml}
-        ${s.memo?`<div class="schedule-detail" style="margin-top:2px;white-space:pre-wrap;">${escapeHtml(s.memo)}</div>`:''}
+        ${s.memo?`<div class="schedule-detail" style="margin-top:2px;white-space:pre-wrap;">${linkify(s.memo)}</div>`:''}
       </div>
       ${editBtn}
     </div>`;
@@ -1987,8 +2007,8 @@ function renderInfos(){
               <span style="background:${color};color:#fff;font-size:16px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.5px;">${info.from}</span>
               <span style="font-size:16px;color:var(--color-text-secondary);">${dateStr}</span>
             </div>
-            <div style="font-size:19px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">${info.title}</div>
-            <div style="font-size:18px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.6;">${info.body}</div>
+            <div style="font-size:19px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px;">${escapeHtml(info.title)}</div>
+            <div style="font-size:18px;color:var(--color-text-secondary);white-space:pre-wrap;line-height:1.6;">${linkify(info.body)}</div>
           </div>
           ${editBtn}
         </div>
@@ -2021,8 +2041,8 @@ function renderTopInfoBanner(){
             <span style="background:${color};color:#fff;font-size:14px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px;">${info.from}</span>
             <span style="font-size:16px;color:var(--color-text-secondary);">${dateStr}</span>
           </div>
-          <div style="font-size:18px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px;">${info.title}</div>
-          <div style="font-size:17px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${bodyPreview}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px;">${escapeHtml(info.title)}</div>
+          <div style="font-size:17px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(bodyPreview)}</div>
         </div>`;
       }).join('')}
     </div>
