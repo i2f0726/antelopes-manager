@@ -682,6 +682,7 @@ const db = firebase.firestore();
 
 // ========== 定数 ==========
 const PASSWORDS={ view:'1234', admin:'9999' };
+const ADMIN_KEY='antelope2026';
 const WEEKDAYS=['日','月','火','水','木','金','土'];
 const TYPE_LABEL={practice:'練習',game:'練習試合',tournament:'大会',other:'その他'};
 const TYPE_CLASS={practice:'ev-practice',game:'ev-game',tournament:'ev-tournament',other:'ev-other'};
@@ -865,7 +866,7 @@ async function executePromotion(){
         });
         // 残りを+1学年
         players.filter(p=>p.grade!==6).forEach(p=>{
-          batch.update(db.collection('players').doc(p.id), {grade: p.grade+1});
+          batch.update(db.collection('players').doc(p.id), {grade: p.grade+1, adminKey:ADMIN_KEY});
         });
         await batch.commit();
         hidePromotion();
@@ -1048,7 +1049,7 @@ function _doSavePlayer(args){
     try{
       if(editingPlayerId){
         // 編集：既存IDを上書き → 詳細モーダルを表示モードに戻す
-        await db.collection('players').doc(editingPlayerId).set(data);
+        await db.collection('players').doc(editingPlayerId).set({...data, adminKey:ADMIN_KEY});
         // 編集後は同じ選手の詳細表示に戻る
         currentDetailId=editingPlayerId;
         editingPlayerId=null;
@@ -1058,7 +1059,7 @@ function _doSavePlayer(args){
         switchToViewMode();
       } else {
         // 新規追加：自動ID → 詳細モーダルを閉じる
-        await db.collection('players').add(data);
+        await db.collection('players').add({...data, adminKey:ADMIN_KEY});
         closeDetail();
         // 旧addModalも念のため閉じる（互換性のため）
         closeAdd();
@@ -1865,9 +1866,9 @@ async function saveSchedule(){
     onOk: async ()=>{
       try{
         if(editingScheduleId){
-          await db.collection('schedules').doc(editingScheduleId).set(data);
+          await db.collection('schedules').doc(editingScheduleId).set({...data, adminKey:ADMIN_KEY});
         } else {
-          await db.collection('schedules').add(data);
+          await db.collection('schedules').add({...data, adminKey:ADMIN_KEY});
         }
         closeScheduleModal();
       } catch(e){
@@ -1904,7 +1905,7 @@ async function saveMonthlyMsg(){
     onOk: async ()=>{
       try{
         if(body.trim()){
-          await db.collection('monthlyMessages').doc(key).set({body, updatedAt:Date.now()});
+          await db.collection('monthlyMessages').doc(key).set({body, updatedAt:Date.now(), adminKey:ADMIN_KEY});
         } else {
           // 空欄なら削除
           await db.collection('monthlyMessages').doc(key).delete().catch(()=>{});
@@ -1951,7 +1952,7 @@ async function saveDowSet(){
     okClass:'btn-submit',
     onOk: async ()=>{
       try{
-        await db.collection('settings').doc('dow').set(newSettings);
+        await db.collection('settings').doc('dow').set({...newSettings, adminKey:ADMIN_KEY});
         closeDowSetModal();
       } catch(e){
         alert('保存に失敗しました: '+e.message);
@@ -1973,7 +1974,7 @@ async function clearDowSet(){
     okClass:'btn-delete',
     onOk: async ()=>{
       try{
-        await db.collection('settings').doc('dow').set(newSettings);
+        await db.collection('settings').doc('dow').set({...newSettings, adminKey:ADMIN_KEY});
         closeDowSetModal();
       } catch(e){
         alert('保存に失敗しました: '+e.message);
@@ -2086,9 +2087,9 @@ async function saveInfo(){
     onOk: async ()=>{
       try{
         if(editingInfoId){
-          await db.collection('infos').doc(editingInfoId).set(data);
+          await db.collection('infos').doc(editingInfoId).set({...data, adminKey:ADMIN_KEY});
         } else {
-          await db.collection('infos').add(data);
+          await db.collection('infos').add({...data, adminKey:ADMIN_KEY});
         }
         closeInfoModal();
       } catch(e){
@@ -2155,7 +2156,7 @@ async function savePwChange(){
     okClass:'btn-submit',
     onOk: async ()=>{
       try{
-        await db.collection('settings').doc('passwords').set(update, {merge:true});
+        await db.collection('settings').doc('passwords').set({...update, adminKey:ADMIN_KEY}, {merge:true});
         closePwChange();
         alert('パスワードを変更しました');
       } catch(e){

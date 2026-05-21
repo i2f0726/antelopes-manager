@@ -1,7 +1,7 @@
 // ===== Antelopes Scores Service Worker =====
 // バージョン番号：HTMLや本ファイルを更新するたびに数字を上げてください
 // 例: v1.0.0 → v1.0.1 → v1.0.2 ...
-const CACHE_VERSION = '2026-05-08-1234';
+const CACHE_VERSION = '2026-05-22-0030';
 const CACHE_NAME = 'antelopes-scores-' + CACHE_VERSION;
 
 // オフラインで動くようにキャッシュしておくファイル
