@@ -1,3 +1,4 @@
+<style>html,body{margin:0;padding:0;background:#ffffff;}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="color-scheme" content="light">
 <!-- PWA設定 -->
@@ -54,11 +55,11 @@ if ('serviceWorker' in navigator) {
     --theme-text-on: #111;        /* メインカラー上に乗せる文字色 */
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  .pw-screen { display:flex; align-items:center; justify-content:center; min-height:500px; border-radius:16px; background:#1a1a1a; }
-  .pw-box { border:1px solid var(--theme-main); border-radius:16px; padding:32px 28px; text-align:center; width:300px; background:#222222; }
+  .pw-screen { display:flex; align-items:center; justify-content:center; min-height:100svh; background:#ffffff; }
+  .pw-box { border:1px solid var(--theme-main); border-radius:20px; padding:36px 28px; text-align:center; width:300px; background:#ffffff; box-shadow:0 4px 24px rgba(0,0,0,0.12); }
   .pw-title { color:var(--theme-main); font-size:21px; font-weight:700; margin-bottom:4px; }
-  .pw-sub { color:#aaa; font-size:14px; margin-bottom:20px; }
-  .pin-disp { font-size:32px; letter-spacing:16px; color:#fff; margin:12px 0; min-height:40px; }
+  .pw-sub { color:#777; font-size:14px; margin-bottom:20px; }
+  .pin-disp { font-size:32px; letter-spacing:16px; color:#111; margin:12px 0; min-height:40px; }
   .pin-err { color:#e24b4a; font-size:14px; min-height:18px; margin-bottom:8px; }
   .np { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .np-btn { all:unset; display:block; padding:14px; font-size:23px; font-weight:700; border-radius:10px; background-color:var(--theme-main) !important; color:var(--theme-text-on) !important; cursor:pointer; text-align:center; font-family:sans-serif; -webkit-text-fill-color:var(--theme-text-on) !important; }
@@ -84,24 +85,24 @@ if ('serviceWorker' in navigator) {
   .stat-label { font-size:12px; color:var(--color-text-secondary); margin-top:2px; }
 
   /* 選手統計パネル（選手管理タブ内） */
-  .player-stats { background:#111; margin:0; padding:14px 12px; border-bottom:2px solid var(--theme-main); }
-  .ps-main { display:flex; align-items:center; background:#1a1a1a; border-radius:12px; padding:14px 10px; margin-bottom:10px; border:1px solid #333; }
+  .player-stats { background:#f8f8f8; margin:0; padding:14px 12px; border-bottom:2px solid var(--theme-main); }
+  .ps-main { display:flex; align-items:center; background:#ffffff; border-radius:12px; padding:14px 10px; margin-bottom:10px; border:1px solid #e0e0e0; box-shadow:0 1px 4px rgba(0,0,0,0.07); }
   .ps-main-item { flex:1; text-align:center; }
-  .ps-main-divider { width:1px; height:38px; background:#333; }
-  .ps-main-label { font-size:12px; color:#aaa; margin-bottom:4px; letter-spacing:1px; font-weight:700; }
+  .ps-main-divider { width:1px; height:38px; background:#e0e0e0; }
+  .ps-main-label { font-size:12px; color:#888; margin-bottom:4px; letter-spacing:1px; font-weight:700; }
   .ps-main-value { font-size:30px; font-weight:900; color:var(--theme-main); line-height:1; }
-  .ps-unit { font-size:15px; color:#888; margin-left:3px; font-weight:700; }
+  .ps-unit { font-size:15px; color:#aaa; margin-left:3px; font-weight:700; }
   .ps-grades { display:flex; gap:6px; }
-  .ps-grade-item { flex:1; background:#1a1a1a; border-radius:8px; padding:8px 4px; text-align:center; border:1px solid #2a2a2a; display:flex; flex-direction:column; align-items:center; gap:2px; }
-  .ps-grade-num { font-size:21px; font-weight:900; color:#fff; line-height:1; }
+  .ps-grade-item { flex:1; background:#ffffff; border-radius:8px; padding:8px 4px; text-align:center; border:1px solid #e8e8e8; box-shadow:0 1px 3px rgba(0,0,0,0.06); display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .ps-grade-num { font-size:21px; font-weight:900; color:#222; line-height:1; }
   .ps-grade-label { font-size:12px; color:var(--theme-main); font-weight:700; }
   .admin-bar { display:flex; justify-content:flex-start; align-items:center; padding:6px 16px; background:var(--color-background-secondary); border-bottom:0.5px solid var(--color-border-tertiary); }
   .admin-status { font-size:13px; color:var(--color-text-secondary); font-weight:700; letter-spacing:0.5px; }
   .admin-btn { font-size:13px; padding:5px 14px; border-radius:20px; border:0.5px solid var(--color-border-secondary); background:transparent; cursor:pointer; color:var(--color-text-primary); font-family:inherit; }
   .admin-btn.logout { background:#fff0f0; color:#c00; border-color:#fcc; }
-  .tabs { display:flex; background:#111; border-bottom:0.5px solid var(--color-border-tertiary); padding:6px 6px 0; gap:4px; }
-  .tab { flex:1; padding:12px 8px; text-align:center; font-size:15px; font-weight:700; cursor:pointer; color:#888; background:#1f1f1f; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none; transition:all 0.15s; }
-  .tab:hover { color:#ccc; background:#2a2a2a; }
+  .tabs { display:flex; background:#f0f0f0; border-bottom:0.5px solid var(--color-border-tertiary); padding:6px 6px 0; gap:4px; }
+  .tab { flex:1; padding:12px 8px; text-align:center; font-size:15px; font-weight:700; cursor:pointer; color:#666; background:#e0e0e0; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none; transition:all 0.15s; }
+  .tab:hover { color:#333; background:#d0d0d0; }
   .tab.active { color:var(--theme-text-on); background:var(--theme-main); border-color:var(--theme-light); box-shadow:0 -2px 8px rgba(0,0,0,0.3); }
   .toolbar { display:flex; gap:8px; padding:10px 12px; background:var(--color-background-primary); border-bottom:0.5px solid var(--color-border-tertiary); min-height:48px; align-items:center; flex-wrap:wrap; }
   .tb-gold { padding:7px 16px; border-radius:20px; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--theme-main); color:var(--theme-text-on); }
@@ -328,7 +329,16 @@ if ('serviceWorker' in navigator) {
   }
 </style>
 
-<div class="pw-screen" id="pwScreen">
+<!-- スプラッシュ画面 -->
+<div id="splashScreen" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#111111;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;transition:background-color 1s ease;">
+  <div style="width:140px;height:140px;border-radius:28px;overflow:hidden;margin-bottom:24px;box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+    <img src="icon-180.png" alt="アンテロープス" style="width:100%;height:100%;object-fit:contain;display:block;">
+  </div>
+  <div style="color:#ffffff;font-size:28px;font-weight:900;letter-spacing:4px;">ANTELOPES</div>
+  <div style="color:#c9a84c;font-size:13px;font-weight:700;letter-spacing:4px;margin-top:8px;">BASKETBALL CLUB · KAMIICHI</div>
+</div>
+
+<div class="pw-screen" id="pwScreen" style="display:none;">
   <div class="pw-box">
     <div style="width:64px;height:64px;border-radius:10px;background:var(--theme-main);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;overflow:hidden;padding:4px;box-sizing:border-box;"><img src="icon-180.png" alt="アンテロープス" style="width:100%;height:100%;object-fit:contain;display:block;"></div>
     <div class="pw-title">ANTELOPES</div>
@@ -2168,6 +2178,27 @@ async function savePwChange(){
 }
 
 // ========== 起動 ==========
+// スプラッシュ：3秒表示 → 白くフェード（1秒）→ パスワード画面
+(function(){
+  function startSplash(){
+    var splash = document.getElementById('splashScreen');
+    var pw = document.getElementById('pwScreen');
+    if(!splash || !pw) return;
+    setTimeout(function(){
+      splash.style.backgroundColor = '#ffffff';
+      setTimeout(function(){
+        splash.style.display = 'none';
+        pw.style.display = 'flex';
+      }, 1000);
+    }, 3000);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', startSplash);
+  } else {
+    startSplash();
+  }
+})();
+
 // Firestoreのリアルタイム同期を開始
 startFirestoreSync();
 
