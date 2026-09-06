@@ -683,8 +683,7 @@ function unlockApp() {
   document.getElementById('pwScreen').style.display = 'none';
   document.getElementById('appRoot').style.display = 'block';
   applyAdminUI();
-  switchTab('view');
-  render();
+  switchTab('view'); // switchTab内で render() 済みのため、ここでの二重呼び出しはしない（ちらつき防止）
   if (isAdmin) backfillAdminKey();
 }
 
