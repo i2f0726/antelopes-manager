@@ -610,7 +610,10 @@ function loadData() {
     db.collection('meta').doc('state').get().then(function(doc) {
       liveId = doc.exists ? (doc.data().liveId || null) : null;
     });
-    if (suppressNextRender) { suppressNextRender = false; return; } // adminKey補完だけの更新は再描画をスキップ（チカチカ防止）
+    // Firestoreの書き込みは「ローカル反映（pending）」→「サーバー確定」の2回イベントが飛んでくるため、
+    // 自分自身の書き込みによる再描画は両方ともスキップしてチカチカを防ぐ
+    if (snapshot.metadata.hasPendingWrites) { return; }
+    if (suppressNextRender) { suppressNextRender = false; return; }
     render();
   });
 }
