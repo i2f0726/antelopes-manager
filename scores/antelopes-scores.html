@@ -685,12 +685,18 @@ function unlockApp() {
 }
 
 // 過去データ（adminKeyフィールドが無い旧レコード）を編集・削除できるように1回だけ補完する
+var backfillDone = false;
 function backfillAdminKey() {
-  matches.forEach(function(m) {
-    if (!m.adminKey) {
-      db.collection('matches').doc(String(m.id)).update({ adminKey: 'antelope2026' }).catch(function() {});
-    }
+  if (backfillDone) return; // 1セッションにつき1回だけ実行（連続書き込みによる画面のちらつき防止）
+  var targets = matches.filter(function(m) { return !m.adminKey; });
+  if (targets.length === 0) { backfillDone = true; return; }
+  var batch = db.batch();
+  targets.forEach(function(m) {
+    batch.update(db.collection('matches').doc(String(m.id)), { adminKey: 'antelope2026' });
   });
+  batch.commit().then(function() {
+    backfillDone = true;
+  }).catch(function() {});
 }
 
 function lockApp() {
