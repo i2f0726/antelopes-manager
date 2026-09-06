@@ -19,7 +19,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 :root {
   --forest: #0a0a0a;
@@ -402,9 +401,47 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
 
 /* 区切り線 */
 .divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:14px 0; }
+/* ===== 起動時PINゲート ===== */
+.pw-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--forest); padding:24px; }
+.pw-box { border:1px solid var(--gold); border-radius:20px; padding:36px 28px; text-align:center; width:300px; max-width:100%; background:linear-gradient(160deg, #111111, #0a0a0a); box-shadow:0 4px 24px rgba(0,0,0,0.5); }
+.pw-title { color:var(--gold); font-size:21px; font-weight:900; margin-bottom:4px; font-family:'Bebas Neue',sans-serif; letter-spacing:2px; }
+.pw-sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
+.pin-disp { font-size:32px; letter-spacing:16px; color:var(--text); margin:12px 0; min-height:40px; font-family:'Bebas Neue',sans-serif; }
+.pin-err { color:#e74c3c; font-size:13px; min-height:18px; margin-bottom:8px; }
+.np { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.np-btn { all:unset; display:block; padding:14px; font-size:22px; font-weight:700; border-radius:10px; background:linear-gradient(135deg, var(--gold), var(--gold2)); color:var(--forest); cursor:pointer; text-align:center; font-family:'Noto Sans JP',sans-serif; }
+.np-btn:active { opacity:0.8; }
 </style>
 </head>
 <body>
+
+<!-- ===== スプラッシュ画面 ===== -->
+<div id="splashScreen" style="position:fixed;inset:0;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;transition:background-color 1s ease;">
+  <div style="width:120px;height:120px;border-radius:26px;overflow:hidden;margin-bottom:22px;box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+    <img src="icon-180.png" alt="アンテロープス" style="width:100%;height:100%;object-fit:contain;display:block;">
+  </div>
+  <div style="color:#ffffff;font-size:26px;font-weight:900;letter-spacing:4px;font-family:'Bebas Neue',sans-serif;">ANTELOPES</div>
+  <div style="color:#C9A84C;font-size:12px;font-weight:700;letter-spacing:3px;margin-top:8px;">SCORE BOARD · KAMIICHI</div>
+</div>
+
+<!-- ===== コード入力ゲート（起動時に必ず表示） ===== -->
+<div class="pw-screen" id="pwScreen" style="display:none;">
+  <div class="pw-box">
+    <div style="width:64px;height:64px;border-radius:14px;overflow:hidden;margin:0 auto 12px;box-shadow:0 2px 8px rgba(0,0,0,0.4);"><img src="icon-180.png" alt="アンテロープス" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+    <div class="pw-title">ANTELOPES SCOREBOARD</div>
+    <div class="pw-sub">パスワードを入力してください</div>
+    <div class="pin-disp" id="pinDisp">- - - -</div>
+    <div class="pin-err" id="pinErr"></div>
+    <div class="np">
+      <button class="np-btn" onclick="inp('1')">1</button><button class="np-btn" onclick="inp('2')">2</button><button class="np-btn" onclick="inp('3')">3</button>
+      <button class="np-btn" onclick="inp('4')">4</button><button class="np-btn" onclick="inp('5')">5</button><button class="np-btn" onclick="inp('6')">6</button>
+      <button class="np-btn" onclick="inp('7')">7</button><button class="np-btn" onclick="inp('8')">8</button><button class="np-btn" onclick="inp('9')">9</button>
+      <button class="np-btn" onclick="clrPin()">C</button><button class="np-btn" onclick="inp('0')">0</button><button class="np-btn" onclick="bspPin()">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div id="appRoot" style="display:none">
 
 <header style="padding:12px 16px;text-align:left;">
   <div style="display:flex;align-items:center;gap:16px;">
@@ -416,6 +453,26 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
     <span style="font-size:0.55rem;color:var(--muted);letter-spacing:2px;font-weight:900;margin-left:8px;">| Kamiichi Mini Basketball — Score Board</span>
   </div>
 </header>
+
+<div id="adminLoginBar" style="text-align:right;padding:8px 16px;background:var(--forest);">
+  <button id="adminLoginBtn" onclick="toggleAdmin()" style="padding:7px 14px;border-radius:100px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-size:0.68rem;font-weight:900;cursor:pointer;font-family:'Noto Sans JP',sans-serif;letter-spacing:0.5px;">🔒 管理者ログイン</button>
+</div>
+
+<!-- 管理者ログイン用ミニPINポップアップ（閲覧モードから管理者モードへ切り替え） -->
+<div id="adminOverlay" style="display:none;position:fixed;inset:0;z-index:15000;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,0.7);">
+  <div class="pw-box" style="width:260px;">
+    <div class="pw-title" style="font-size:1rem;">🔒 管理者パスワード</div>
+    <div class="pin-disp" id="adminPinDisp" style="font-size:1.7rem;letter-spacing:12px;">- - - -</div>
+    <div class="pin-err" id="adminPinErr"></div>
+    <div class="np" style="margin-top:10px;">
+      <button class="np-btn" onclick="adminInp('1')">1</button><button class="np-btn" onclick="adminInp('2')">2</button><button class="np-btn" onclick="adminInp('3')">3</button>
+      <button class="np-btn" onclick="adminInp('4')">4</button><button class="np-btn" onclick="adminInp('5')">5</button><button class="np-btn" onclick="adminInp('6')">6</button>
+      <button class="np-btn" onclick="adminInp('7')">7</button><button class="np-btn" onclick="adminInp('8')">8</button><button class="np-btn" onclick="adminInp('9')">9</button>
+      <button class="np-btn" onclick="adminClrPin()">C</button><button class="np-btn" onclick="adminInp('0')">0</button><button class="np-btn" onclick="adminBspPin()">⌫</button>
+    </div>
+    <button onclick="closeAdminOverlay()" style="margin-top:14px;width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.85rem;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">キャンセル</button>
+  </div>
+</div>
 
 <div class="tabs">
   <div class="tab active" id="tab-view" onclick="switchTab('view')">📊 試合結果</div>
@@ -431,23 +488,12 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
 
 <!-- 管理者 -->
 <div id="admin" class="section">
-  <div class="login-box" id="loginBox">
-    <h3>🔒 ADMIN LOGIN</h3>
-    <div style="max-width:280px;margin:0 auto;">
-      <div style="margin-bottom:14px;">
-        <label>パスワード</label>
-        <input type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-      <button class="btn" style="width:100%;padding:12px;" onclick="doLogin()">ログイン</button>
-    </div>
-  </div>
-
   <div id="adminPanel" style="display:none">
     <div class="admin-header">
       <div class="admin-badge">✅ 管理者モード</div>
       <div class="admin-btns">
         <button class="btn" style="font-size:0.72rem;padding:7px 14px" onclick="doExcel()">📊 Excel出力</button>
-        <button class="btn" style="font-size:0.72rem;padding:7px 14px;background:transparent;border:1px solid var(--muted);color:var(--muted);" onclick="doLogout()">🚪 ログアウト</button>
+        <button class="btn" style="font-size:0.72rem;padding:7px 14px;background:transparent;border:1px solid var(--muted);color:var(--muted);" onclick="lockApp()">🚪 ログアウト</button>
       </div>
     </div>
 
@@ -531,6 +577,8 @@ label { display:block; font-size:0.68rem; color:var(--muted); margin-bottom:4px;
   </div>
 </div>
 
+</div>
+
 <script>
 window.addEventListener("load", function() {
 var matches = [];
@@ -549,31 +597,6 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-var auth = firebase.auth();
-
-// ログイン状態を監視
-firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
-    isAdmin = true;
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    var btn = document.querySelector('#loginBox .btn');
-    if (btn) { btn.textContent = 'ログイン'; btn.disabled = false; }
-    if (liveId) {
-      for (var i = 0; i < matches.length; i++) {
-        if (matches[i].id === liveId) { fillForm(matches[i]); break; }
-      }
-    }
-    updatePreview();
-    toast('✅ ログインしました');
-    render();
-  } else {
-    isAdmin = false;
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('adminPanel').style.display = 'none';
-    render();
-  }
-});
 
 // Firestoreからデータ読み込み＆リアルタイム更新
 function loadData() {
@@ -597,10 +620,11 @@ function saveData() {
 }
 
 function saveMeta() {
-  db.collection('meta').doc('state').set({ liveId: liveId });
+  db.collection('meta').doc('state').set({ liveId: liveId, adminKey: 'antelope2026' });
 }
 
 function switchTab(t) {
+  if (t === 'admin' && !isAdmin) { return; }
   document.getElementById('view').classList.toggle('active', t === 'view');
   document.getElementById('admin').classList.toggle('active', t === 'admin');
   document.getElementById('tab-view').classList.toggle('active', t === 'view');
@@ -615,38 +639,129 @@ function toast(msg) {
   setTimeout(function() { el.classList.remove('show'); }, 2500);
 }
 
-function doLogin() {
-  var email = 'admin@antelopes.com'; // 管理者メアド固定
-  var pw = document.getElementById('pwInput').value;
-  if (!pw) { toast('⚠️ パスワードを入力してください'); return; }
-  var btn = document.querySelector('#loginBox .btn');
-  btn.textContent = '...';
-  btn.disabled = true;
-  firebase.auth().signInWithEmailAndPassword(email, pw)
-    .then(function() {
-      // onAuthStateChanged が処理する
-    })
-    .catch(function(e) {
-      btn.textContent = 'ログイン';
-      btn.disabled = false;
-      document.getElementById('pwInput').value = '';
-      toast('❌ ログイン失敗: パスワードが違います');
-    });
+// ===== コード入力ゲート（起動時に必ず表示・数字キーパッド方式・1234 / 9999） =====
+var PASSWORDS = { view: '1234', admin: '9999' };
+var pin = '';
+
+function inp(n) {
+  if (pin.length >= 4) return;
+  pin += n;
+  updatePinDisp();
+  if (pin.length === 4) checkPin();
+}
+function clrPin() { pin = ''; updatePinDisp(); }
+function bspPin() { pin = pin.slice(0, -1); updatePinDisp(); }
+function updatePinDisp() {
+  document.getElementById('pinDisp').textContent = (pin + '----').slice(0, 4).split('').join(' ');
+}
+function checkPin() {
+  if (pin === PASSWORDS.view || pin === PASSWORDS.admin) {
+    isAdmin = (pin === PASSWORDS.admin);
+    unlockApp();
+  } else {
+    document.getElementById('pinErr').textContent = 'パスワードが違います';
+    setTimeout(function() {
+      pin = '';
+      updatePinDisp();
+      document.getElementById('pinErr').textContent = '';
+    }, 1000);
+  }
 }
 
-function doLogout() {
-  firebase.auth().signOut().then(function() {
-    isAdmin = false;
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('adminPanel').style.display = 'none';
-    document.getElementById('pwInput').value = '';
-    var btn = document.querySelector('#loginBox .btn');
-    btn.textContent = 'ログイン';
-    btn.disabled = false;
-    render();
-    toast('👋 ログアウトしました');
+function applyAdminUI() {
+  document.getElementById('tab-admin').style.display = isAdmin ? '' : 'none';
+  document.getElementById('adminPanel').style.display = isAdmin ? 'block' : 'none';
+  document.querySelector('.tabs').style.display = isAdmin ? '' : 'none';
+  document.getElementById('adminLoginBar').style.display = isAdmin ? 'none' : 'block';
+}
+
+function unlockApp() {
+  document.getElementById('pwScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'block';
+  applyAdminUI();
+  switchTab('view');
+  render();
+  if (isAdmin) backfillAdminKey();
+}
+
+// 過去データ（adminKeyフィールドが無い旧レコード）を編集・削除できるように1回だけ補完する
+function backfillAdminKey() {
+  matches.forEach(function(m) {
+    if (!m.adminKey) {
+      db.collection('matches').doc(String(m.id)).update({ adminKey: 'antelope2026' }).catch(function() {});
+    }
   });
 }
+
+function lockApp() {
+  isAdmin = false;
+  editId = null;
+  applyAdminUI();
+  switchTab('view');
+  render();
+  toast('👋 閲覧モードに戻りました');
+}
+
+// ===== 閲覧モード → 管理者モードへの切り替え（ミニPINポップアップ） =====
+var adminPin = '';
+function adminInp(n) {
+  if (adminPin.length >= 4) return;
+  adminPin += n;
+  updateAdminPinDisp();
+  if (adminPin.length === 4) checkAdminPin();
+}
+function adminClrPin() { adminPin = ''; updateAdminPinDisp(); }
+function adminBspPin() { adminPin = adminPin.slice(0, -1); updateAdminPinDisp(); }
+function updateAdminPinDisp() {
+  document.getElementById('adminPinDisp').textContent = (adminPin + '----').slice(0, 4).split('').join(' ');
+}
+function checkAdminPin() {
+  if (adminPin === PASSWORDS.admin) {
+    isAdmin = true;
+    closeAdminOverlay();
+    applyAdminUI();
+    render();
+    backfillAdminKey();
+    toast('✅ 管理者モードに切り替えました');
+  } else {
+    document.getElementById('adminPinErr').textContent = 'パスワードが違います';
+    setTimeout(function() {
+      adminPin = '';
+      updateAdminPinDisp();
+      document.getElementById('adminPinErr').textContent = '';
+    }, 1000);
+  }
+}
+function toggleAdmin() {
+  adminPin = '';
+  updateAdminPinDisp();
+  document.getElementById('adminPinErr').textContent = '';
+  document.getElementById('adminOverlay').style.display = 'flex';
+}
+function closeAdminOverlay() {
+  document.getElementById('adminOverlay').style.display = 'none';
+}
+
+// スプラッシュ：1秒表示 → 白くフェード（1秒）→ パスワード画面
+(function() {
+  function startSplash() {
+    var splash = document.getElementById('splashScreen');
+    var pw = document.getElementById('pwScreen');
+    if (!splash || !pw) return;
+    setTimeout(function() {
+      splash.style.backgroundColor = '#ffffff';
+      setTimeout(function() {
+        splash.style.display = 'none';
+        pw.style.display = 'flex';
+      }, 1000);
+    }, 1000);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startSplash);
+  } else {
+    startSplash();
+  }
+})();
 
 function gv(id) { return document.getElementById(id).value.trim(); }
 function gn(id) { return parseInt(document.getElementById(id).value) || 0; }
@@ -715,7 +830,7 @@ function buildMatch(isLive) {
   if (!name || !date || !opp) { toast('⚠️ 大会名・日付・対戦相手は必須です'); return null; }
   var hq = [gn('h1'),gn('h2'),gn('h3'),gn('h4')];
   var aq = [gn('a1'),gn('a2'),gn('a3'),gn('a4')];
-  return { id: editId || Date.now(), name:name, date:date, place:gv('fPlace'), opp:opp, hq:hq, aq:aq, ht:Math.max(hq[0],hq[1],hq[2],hq[3]), at:Math.max(aq[0],aq[1],aq[2],aq[3]), live:isLive };
+  return { id: editId || Date.now(), name:name, date:date, place:gv('fPlace'), opp:opp, hq:hq, aq:aq, ht:Math.max(hq[0],hq[1],hq[2],hq[3]), at:Math.max(aq[0],aq[1],aq[2],aq[3]), live:isLive, adminKey:'antelope2026' };
 }
 
 function doLive() {
@@ -916,8 +1031,15 @@ loadData();
 
 // HTMLのonclickから呼べるようにグローバルに登録
 window.switchTab = switchTab;
-window.doLogin = doLogin;
-  window.doLogout = doLogout;
+window.inp = inp;
+window.clrPin = clrPin;
+window.bspPin = bspPin;
+window.lockApp = lockApp;
+window.toggleAdmin = toggleAdmin;
+window.closeAdminOverlay = closeAdminOverlay;
+window.adminInp = adminInp;
+window.adminClrPin = adminClrPin;
+window.adminBspPin = adminBspPin;
 window.doLive = doLive;
 window.doConfirm = doConfirm;
 window.doEdit = doEdit;
